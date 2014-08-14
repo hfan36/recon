@@ -3,10 +3,8 @@
 #include <string>
 #include <sstream>
 #include <Windows.h>
-
+#include <cuda_profiler_api.h>
 #include "hf_siddon_recon.hpp"
-#include "cuda_profiler_api.h"
-
 
 
 int main()
@@ -19,16 +17,6 @@ int main()
 	sdkCreateTimer(&timer);
 	sdkResetTimer(&timer);
 	sdkStartTimer(&timer);
-	
-	mlem_input_values mlem_values;
-	
-	unsigned int N_iteration = 20;
-	unsigned int total_projection_images = 180;
-	float delta_angle_deg = 2;
-
-	mlem_values.create(N_iteration, total_projection_images, delta_angle_deg, 
-			"H:/Visual Studio 2010/CTSolution/Siddon/ball/", "fp_ball64", ".bin");
-
 	
 	//----------------reconstruction part--------------------------------
 	siddon_recon recon;
