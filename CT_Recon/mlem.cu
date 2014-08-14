@@ -13,7 +13,6 @@ int main()
 {
 	cudaProfilerStart();
 
-
 	double totalTime;
 	StopWatchInterface *timer;
 	sdkCreateTimer(&timer);
@@ -34,7 +33,7 @@ int main()
 	siddon_recon recon;
 	recon.a1_recon_initiate("CTParameters_042414.h");
 	recon.a_MLEM();
-
+	//branching yet??
 	//-------------------------------------------------------------------
 
 
