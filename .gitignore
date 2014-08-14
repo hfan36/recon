@@ -48,6 +48,8 @@ siddon_device_kernelMLEM_backup.cuh
 siddon_functions.cuh
 siddon_kernelsMLEM_backup.cuh
 test_2Darray.cu
+*.opensdf
+*.sdf
 [Bb]in
 [Dd]ebug*/
 *.lib
