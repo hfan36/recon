@@ -19,21 +19,10 @@ int main()
 	sdkResetTimer(&timer);
 	sdkStartTimer(&timer);
 	
-	mlem_input_values mlem_values;
-	
-	unsigned int N_iteration = 20;
-	unsigned int total_projection_images = 180;
-	float delta_angle_deg = 2;
-
-	mlem_values.create(N_iteration, total_projection_images, delta_angle_deg, 
-			"H:/Visual Studio 2010/CTSolution/Siddon/ball/", "fp_ball64", ".bin");
-
-	
 	//----------------reconstruction part--------------------------------
 	siddon_recon recon;
 	recon.a1_recon_initiate("CTParameters_042414.h");
 	recon.a_MLEM();
-	//branching yet??
 	//-------------------------------------------------------------------
 
 
