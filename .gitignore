@@ -21,7 +21,9 @@ Thumbs.db
 *.vcxproj
 *.sln
 *.filters
-*.ipch
+ipch/
+*.opensdf
+*.sdf
 backward_projection_siddon.cuh
 forward_projection_siddon.cuh
 hf_siddon_device_kernel.cuh
@@ -49,8 +51,6 @@ siddon_device_kernelMLEM_backup.cuh
 siddon_functions.cuh
 siddon_kernelsMLEM_backup.cuh
 test_2Darray.cu
-*.opensdf
-*.sdf
 [Bb]in
 [Dd]ebug*/
 *.lib
