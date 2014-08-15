@@ -68,7 +68,7 @@ struct ScanParameters
 	{
 		ConfigFile configfile(FilePath);
 
-		this->N_iteration	= configfile.read<float>("N_iteration");
+		this->N_iteration	= configfile.read<unsigned int>("N_iteration");
 		this->NumProj	= configfile.read<unsigned int>("NumProj");
 		this->DeltaAng	= configfile.read<float>("DeltaAng");
 		return 0;

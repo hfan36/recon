@@ -21,10 +21,26 @@ int main()
 	//----------------reconstruction part--------------------------------
 	siddon_recon recon;
 	recon.a1_recon_initiate("CTParameters_042414.h");
-	recon.a_MLEM();
+	//recon.a_MLEM();
+	//WriteToParamFile w;
+	//w.CalParam.LoadFromConfigFile("CTParameters_042414.h");
+	//w.ObjParam.LoadFromConfigFile("CTParameters_042414.h");
+	//w.WriteToFile("test.txt");
 
-	//changes ready to go yay
-	//8/15/2014
+	//CalibrationParam param;
+	//Detector det;
+	//VoxVolParam vox;
+	//ScanParameters scanparam;
+	//FilePaths filepath;
+	//param.LoadFromConfigFile("CTParameters_042414.h");
+	//det.LoadFromConfigFile("CTParameters_042414.h");
+	//vox.LoadFromConfigFile("CTParameters_042414.h");
+	//scanparam.LoadFromConfigFile("CTParameters_042414.h");
+	//filepath.LoadFromconfigFile("CTParameters_042414.h");
+
+	//WriteParameterFile w;
+	//w.PrintToFile("test.cfg", param, det, vox, scanparam, filepath);
+	
 	//-------------------------------------------------------------------
 
 

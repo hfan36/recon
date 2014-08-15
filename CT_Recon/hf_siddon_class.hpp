@@ -417,5 +417,126 @@ sensitivity::~sensitivity()
 }
 
 
+class WriteParameterFile
+{
+
+public:
+	void a_PrintToFile(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
+	void a_PrintToFile(std::string parameterfilename, CalibrationParam params, Detector det, 
+						VoxVolParam vox, ScanParameters scanparam, 
+						FilePaths filepath);
+
+
+	~WriteParameterFile();
+
+protected:
+
+	void m_write_calparam(CalibrationParam params);
+	void m_write_det(Detector det);
+	void m_write_vox(VoxVolParam vox);
+	void m_write_scanparam(ScanParameters scanparam);
+	void m_write_filepath(FilePaths filepath);
+	std::ofstream m_file;
+};
+
+void WriteParameterFile::a_PrintToFile(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
+{
+
+	this->m_file.precision(4);
+	this->m_file.setf( std::ios::fixed, std::ios::floatfield);
+	this->m_file.open( create_filename(filepath.ReconFileFolder, "ParameterFile.cfg") );
+	this->m_write_calparam(params);
+	this->m_write_det(det);
+	this->m_write_vox(vox);
+	this->m_write_scanparam(scanparam);
+	this->m_write_filepath(filepath);
+	this->m_file.close();
+}
+
+void WriteParameterFile::a_PrintToFile(std::string parameterfilename, CalibrationParam params, Detector det, 
+											VoxVolParam vox, ScanParameters scanparam, 
+											FilePaths filepath)
+{
+	this->m_file.precision(4);
+	this->m_file.setf( std::ios::fixed, std::ios::floatfield);
+	this->m_file.open( create_filename(filepath.ReconFileFolder, parameterfilename) );
+	this->m_write_calparam(params);
+	this->m_write_det(det);
+	this->m_write_vox(vox);
+	this->m_write_scanparam(scanparam);
+	this->m_write_filepath(filepath);
+	this->m_file.close();
+}
+
+void WriteParameterFile::m_write_calparam(CalibrationParam params)
+{
+	this->m_file << "################################ \n";
+	this->m_file << "#### Calibration Parameters #### \n";
+	this->m_file << "################################ \n\n";
+	this->m_file << "R	\t = " << params.R << "\t\t# millimeters, x-ray source to detector distance (float) \n";
+	this->m_file << "Rf \t\t = " << params.Rf << "\t\t\t# millimeters, x-ray source to rotation axis (float) \n";
+	this->m_file << "Ry \t\t = " << params.Ry<< "\t\t# millimeters, R + dy\n";
+	this->m_file << "Dx \t\t = " << params.Dx << "\t\t\t# millimeters, Detector offset in x direction (float)\n";
+	this->m_file << "Dz \t\t = " << params.Dz << "\t\t\t# millimeters, Detector offset in z direction (float)\n";
+	this->m_file << "xangle \t = " << params.xangle << "\t\t\t# radians, theta, Detector misalignment angle about x-axis (float)\n";
+	this->m_file << "yangle \t = " << params.yangle << "\t\t\t# radians, eta, Detector misalignment angle about y-axis (float)\n";
+	this->m_file << "zangle \t = " << params.zangle << "\t\t\t# radians, phi, Detector misalignment angle about z-axis (float)\n";
+	this->m_file << "M \t\t = " << params.M << "\t\t\t# magnification of the lens (float)\n";
+	this->m_file << "\n\n";
+}
+
+void WriteParameterFile::m_write_det(Detector det)
+{
+	this->m_file << "############################### \n";
+	this->m_file << "##### Detector Parameters ##### \n";
+	this->m_file << "############################### \n\n";
+	this->m_file << "TAxPixels \t\t = " << det.NumTAxPixels << "\t\t\t# 2160 Number of Transaxial pixels (unsigned int)\n";
+	this->m_file << "AxPixels \t\t = " << det.NumAxPixels << "\t\t\t# 2560 Number of Axial pixels (unsigned int)\n";
+	this->m_file << "TAxPixDim \t\t = " << det.TAxPixDimMm << "\t\t# millimeters, Dimension of pixel in Transaxial direction (float)\n";
+	this->m_file << "AxPixDim \t\t = " << det.AxPixDimMm << "\t\t# millimeters, Dimension of pixel in Axial direction (float)\n";
+	this->m_file << "\n\n";
+}
+
+void WriteParameterFile::m_write_vox(VoxVolParam vox)
+{
+	this->m_file << "############################### \n";
+	this->m_file << "### Voxel Volume Parameters ### \n";
+	this->m_file << "############################### \n\n";
+	this->m_file << "Xdim \t\t = " << vox.Xdim << "\t\t\t# Number of voxels in x direction (unsigned int)\n";
+	this->m_file << "Ydim \t\t = " << vox.Ydim << "\t\t\t# Number of voxels in y direction (unsigned int)\n";
+	this->m_file << "Zdim \t\t = " << vox.Zdim << "\t\t\t# Number of voxels in z direction (unsigned int)\n";
+	this->m_file << "XVoxSize \t = " << vox.XVoxSize << "\t\t# millimeters, size of voxel element in x direction (float)\n";
+	this->m_file << "YVoxSize \t = " << vox.YVoxSize << "\t\t# millimeters, size of voxel element in y direction (float)\n";
+	this->m_file << "ZVoxSize \t = " << vox.ZVoxSize << "\t\t# millimeters, size of voxel element in z direction (float)\n";
+	this->m_file << "\n\n";
+}
+
+void WriteParameterFile::m_write_scanparam(ScanParameters scanparam)
+{
+	this->m_file << "############################### \n";
+	this->m_file << "####### Scan Parameters ####### \n";
+	this->m_file << "############################### \n\n";
+	this->m_file << "N_iteration \t = " << scanparam.N_iteration << "\t\t\t# Number of MLEM iterations (unsigned int);\n";
+	this->m_file << "NumProj \t\t = " << scanparam.NumProj << "\t\t\t# Number of projections in scan (unsigned int)\n";
+	this->m_file << "DeltaAng \t\t = " << scanparam.DeltaAng << "\t\t# degrees, Angular spacing between projections (float)\n";
+	this->m_file << "\n\n";
+}
+
+void WriteParameterFile::m_write_filepath(FilePaths filepath)
+{
+	this->m_file << "############################### \n";
+	this->m_file << "######### File Paths ########## \n";
+	this->m_file << "############################### \n\n";
+	this->m_file << "ProjFileFolder \t\t\t = " << filepath.ProjFileFolder << "\n";
+	this->m_file << "ProjFileNameRoot \t\t = " << filepath.ProjFileNameRoot << "\n";
+	this->m_file << "ProjFileSuffix \t\t\t = " << filepath.ProjFileSuffix << "\n";
+	this->m_file << "ReconFileFolder \t\t = " << filepath.ReconFileFolder << "\n";
+	this->m_file << "ReconFileNameRoot \t\t = " << filepath.ReconFileNameRoot << "\n";
+	this->m_file << "ReconFileSuffix \t\t = " << filepath.ReconFileSuffix << "\n";
+}
+
+WriteParameterFile::~WriteParameterFile()
+{
+}
 
 #endif

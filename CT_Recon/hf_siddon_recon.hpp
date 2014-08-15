@@ -8,10 +8,11 @@
 #include "hf_siddon_class.hpp"
 #include "RawData.hpp"
 
-class siddon_recon : public forward, public backward
+class siddon_recon : public forward, public backward, public WriteParameterFile
 {
 public:
 	void a1_recon_initiate(std::string configurationfilename);
+	void a_MLEM(std::string outputparameterfilename);
 	void a_MLEM();
 	float *a_pull_recon_pointer();
 	float *a_dsensitivity_pointer();
@@ -51,6 +52,7 @@ protected:
 	void m_correct_filepaths(FilePaths &filepaths);
 
 	void m_mlem_single_iteration(int c2x, int c2y);
+	void m_mlem_all_iterations();
 
 private:
 	bool allocate_check;
@@ -63,11 +65,10 @@ void siddon_recon::m_calc_sensitivity()
 	CUDA_SAFE_CALL( cudaMemset( this->pd_sensitivity, 0, this->N_object_voxels*sizeof(float) ) );
 	set_ones<<<this->m_blocks_image, this->m_threads_image>>>(md_g_data);
 	std::cout << "calculating sensitivity..." << std::endl;
-	//std::cout << "sensitivity angle calculated to: " ;
 	CursorGetXY(cursorX, cursorY);
 
 	float angle_degree;
-	for (int n = 0; n < this->m_scanparam.NumProj; n++) // mlem_values.total_projection_images
+	for (unsigned int n = 0; n < this->m_scanparam.NumProj; n++) // mlem_values.total_projection_images
 	{
 		angle_degree = this->m_scanparam.DeltaAng*(float)n;
 
@@ -193,7 +194,7 @@ void siddon_recon::a1_recon_initiate(std::string configurationfilename)
 void siddon_recon::m_mlem_single_iteration(int c2x, int c2y)
 {	
 		CUDA_SAFE_CALL( cudaMemset(this->md_Ht_fscale, 0, this->N_object_voxels*sizeof(float) ) );
-		for (int n = 0; n < this->m_scanparam.NumProj; n++)
+		for (unsigned int n = 0; n < this->m_scanparam.NumProj; n++)
 		{
 			float angle_degrees = (float)n * this->m_scanparam.DeltaAng;
 
@@ -230,26 +231,19 @@ void siddon_recon::m_mlem_single_iteration(int c2x, int c2y)
 
 }
 
-void siddon_recon::a_MLEM()
+void siddon_recon::m_mlem_all_iterations()
 {
-
-	int c1x, c1y, c2x, c2y;
-
-	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
-
-	if (file_check)
-	{
+		int c1x, c1y, c2x, c2y;
 
 		//this->m_calc_sensitivity();
 		set_ones<<<this->m_blocks_object, this->m_threads_object>>>(this->md_f);
-
 
 		std::cout << "====================================================================="<< std::endl;
 		std::cout << "MLEM recon started..." << std::endl;
 		std::cout << "MLEM loop = ";
 		CursorGetXY(c1x, c1y);
 
-		for (int iteration = 0; iteration < this->m_scanparam.N_iteration; iteration++)
+		for (unsigned int iteration = 0; iteration < this->m_scanparam.N_iteration; iteration++)
 		{
 			//============== nothing but display on prompt ==========================================================
 			CursorGotoXY(c1x, c1y, "          ");
@@ -269,10 +263,33 @@ void siddon_recon::a_MLEM()
 		}
 		std::cout << "\n";
 		std::cout << "completed! \n" << std::endl;
+}
+
+
+void siddon_recon::a_MLEM()
+{
+	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+
+	if (file_check)
+	{
+		this->m_mlem_all_iterations();
+		this->a_PrintToFile(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
 	}
-	
+}
+
+void siddon_recon::a_MLEM(std::string outputparameterfilename)
+{
+
+	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+
+	if (file_check)
+	{
+		this->m_mlem_all_iterations();
+		this->a_PrintToFile(outputparameterfilename, this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+	}
 
 }
+
 
 siddon_recon::~siddon_recon()
 {
