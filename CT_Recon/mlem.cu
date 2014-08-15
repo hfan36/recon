@@ -11,7 +11,6 @@ int main()
 {
 	cudaProfilerStart();
 
-
 	double totalTime;
 	StopWatchInterface *timer;
 	sdkCreateTimer(&timer);
@@ -20,10 +19,13 @@ int main()
 	
 	//----------------reconstruction part--------------------------------
 	siddon_recon recon;
-	recon.a1_recon_initiate("CTParameters_042414.h");
-	recon.a_MLEM();
+	recon.a1_recon_initiate("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon\\ball", 
+							"recon_fp_ball.cfg");
+	//recon.a_MLEM();
+
 
 	//-------------------------------------------------------------------
+
 
 
 	//-------------- just forward projection----------------------------
