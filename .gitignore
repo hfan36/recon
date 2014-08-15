@@ -19,6 +19,7 @@ Thumbs.db
 *.log
 *.bin
 *.vcxproj
+*.ipch
 *.sln
 *.filters
 backward_projection_siddon.cuh
