@@ -19,8 +19,7 @@ int main()
 	
 	//----------------reconstruction part--------------------------------
 	siddon_recon recon;
-	recon.a1_recon_initiate("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon\\ball",
-							"recon_fp_ball.cfg");
+	recon.a1_recon_initiate("recon_fp_ball.cfg");
 	//recon.a_MLEM();
 
 
