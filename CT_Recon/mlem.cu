@@ -11,7 +11,6 @@ int main()
 {
 	cudaProfilerStart();
 
-
 	double totalTime;
 	StopWatchInterface *timer;
 	sdkCreateTimer(&timer);
@@ -20,28 +19,13 @@ int main()
 	
 	//----------------reconstruction part--------------------------------
 	siddon_recon recon;
-	recon.a1_recon_initiate("CTParameters_042414.h");
+	recon.a1_recon_initiate("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon\\ball",
+							"recon_fp_ball.cfg");
 	//recon.a_MLEM();
-	//WriteToParamFile w;
-	//w.CalParam.LoadFromConfigFile("CTParameters_042414.h");
-	//w.ObjParam.LoadFromConfigFile("CTParameters_042414.h");
-	//w.WriteToFile("test.txt");
 
-	//CalibrationParam param;
-	//Detector det;
-	//VoxVolParam vox;
-	//ScanParameters scanparam;
-	//FilePaths filepath;
-	//param.LoadFromConfigFile("CTParameters_042414.h");
-	//det.LoadFromConfigFile("CTParameters_042414.h");
-	//vox.LoadFromConfigFile("CTParameters_042414.h");
-	//scanparam.LoadFromConfigFile("CTParameters_042414.h");
-	//filepath.LoadFromconfigFile("CTParameters_042414.h");
 
-	//WriteParameterFile w;
-	//w.PrintToFile("test.cfg", param, det, vox, scanparam, filepath);
-	
 	//-------------------------------------------------------------------
+
 
 
 	//-------------- just forward projection----------------------------

@@ -30,9 +30,9 @@ AxPixDim	= 0.0065  	# 0.0065 , 0.013 millimeters, Dimension of pixel in Axial di
 Xdim		= 128		# Number of voxels in x direction (unsigned int)
 Ydim		= 128		# Number of voxels in y direction (unsigned int)
 Zdim		= 4			# Number of voxels in z direction (unsigned int)
-XVoxSize	= 0.5 		# 1.5789  millimeters, size of voxel element in x direction (float)
-YVoxSize	= 0.5		# 1.5789  millimeters, size of voxel element in y direction (float)
-ZVoxSize	= 0.5		# 1.5789  millimeters, size of voxel element in z direction (float)
+XVoxSize	= 0.2 		# 1.5789  millimeters, size of voxel element in x direction (float)
+YVoxSize	= 0.2		# 1.5789  millimeters, size of voxel element in y direction (float)
+ZVoxSize	= 0.2		# 1.5789  millimeters, size of voxel element in z direction (float)
 
 ##############################################
 ##### Object Parameters (not really used)#####
@@ -50,7 +50,7 @@ ObjZangle = 0.0		# degrees, angular orientation of object about z-axis (float)
 ##### Scan Parameters #######
 #############################
 
-N_iteration = 1 	# Number of MLEM iterations (unsigned int);
+N_iteration = 2 	# Number of MLEM iterations (unsigned int);
 NumProj		= 180  	# Number of projections in scan (unsigned int)
 DeltaAng	= 2		# degrees, Angular spacing between projections (float)
 
@@ -65,9 +65,3 @@ ProjFileSuffix 		= .bin												# Projection File suffix
 ReconFileFolder 	= 													# Folder path for the reconstructed file
 ReconFileNameRoot 	= recon_fp_ball64									# Reconstructed file root name
 ReconFileSuffix 	= .bin												# Reconstructed file suffix
-
-ObjFile	= lego_2x3_512.bin		# File path for object data (string)
-ImgFile	= imageData.dat			# File path for image data (string)
-
-
-

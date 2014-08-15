@@ -12,8 +12,11 @@ class siddon_recon : public forward, public backward, public WriteParameterFile
 {
 public:
 	void a1_recon_initiate(std::string configurationfilename);
+	void a1_recon_initiate(std::string folder, std::string configurationfilename);
+
 	void a_MLEM(std::string outputparameterfilename);
 	void a_MLEM();
+
 	float *a_pull_recon_pointer();
 	float *a_dsensitivity_pointer();
 	void a_pull_kernel_threads();
@@ -35,7 +38,6 @@ protected:
 	ScanParameters m_scanparam;
 	FilePaths m_filepath;
 
-	
 	LoadRawData <float> readfloat;
 	SaveRawData <float> savefloat;
 
@@ -47,6 +49,7 @@ protected:
 	dim3 m_blocks_object, m_threads_object;
 	dim3 m_blocks_atomic, m_threads_atomic;
 
+	void m_recon_initiate(std::string configurationfilename);
 	void m_calc_sensitivity();
 	void m_calc_kernel_threads();
 	void m_correct_filepaths(FilePaths &filepaths);
@@ -65,6 +68,7 @@ void siddon_recon::m_calc_sensitivity()
 	CUDA_SAFE_CALL( cudaMemset( this->pd_sensitivity, 0, this->N_object_voxels*sizeof(float) ) );
 	set_ones<<<this->m_blocks_image, this->m_threads_image>>>(md_g_data);
 	std::cout << "calculating sensitivity..." << std::endl;
+	std::cout << "angle = ";
 	CursorGetXY(cursorX, cursorY);
 
 	float angle_degree;
@@ -78,12 +82,11 @@ void siddon_recon::m_calc_sensitivity()
 		
 		//CUDA_SAFE_CALL( cudaMemcpy(&this->m_object[0], this->pd_sensitivity, this->N_object_voxels*sizeof(float), cudaMemcpyDeviceToHost) );
 		//savefloat(&this->m_object[0], this->N_object_voxels*sizeof(float), create_filename("", "sense", n, ".bin"));
-		CursorGotoXY(cursorX + 3, cursorY, "          ");
-		CursorGotoXY(cursorX + 3, cursorY);
+		CursorGotoXY(cursorX, cursorY, "          ");
+		CursorGotoXY(cursorX, cursorY);
 		std::cout << angle_degree;
 	}
-	std::cout << "\n";
-	std::cout<< "sensitivity calculated! " << std::endl;
+	std::cout<< "\n sensitivity calculated! " << std::endl;
 
 }
 
@@ -156,7 +159,7 @@ float *siddon_recon::a_pull_recon_pointer()
 	return ( &this->m_object[0] );
 }
 
-void siddon_recon::a1_recon_initiate(std::string configurationfilename)
+void siddon_recon::m_recon_initiate(std::string configurationfilename)
 {
 	//load values from configuration file
 	this->m_params.LoadFromConfigFile(configurationfilename);
@@ -187,12 +190,32 @@ void siddon_recon::a1_recon_initiate(std::string configurationfilename)
 	this->m_calc_kernel_threads();
 	this->a_pull_kernel_threads();
 	allocate_check = true;
+
 }
 
+void siddon_recon::a1_recon_initiate(std::string configurationfilename)
+{
+	if (file_exist(configurationfilename))
+	{
+		this->m_recon_initiate(configurationfilename);
+	}
+}
+
+void siddon_recon::a1_recon_initiate(std::string folder, std::string configurationfilename)
+{
+	check_folder_path(folder);
+	folder.append(configurationfilename);
+	
+	if (file_exist(folder))
+	{
+		this->m_recon_initiate(folder);
+	}
+}
 
 void siddon_recon::m_mlem_single_iteration(int c2x, int c2y)
 {	
 		CUDA_SAFE_CALL( cudaMemset(this->md_Ht_fscale, 0, this->N_object_voxels*sizeof(float) ) );
+
 		for (unsigned int n = 0; n < this->m_scanparam.NumProj; n++)
 		{
 			float angle_degrees = (float)n * this->m_scanparam.DeltaAng;
@@ -220,7 +243,7 @@ void siddon_recon::m_mlem_single_iteration(int c2x, int c2y)
 			//============== nothing but display on prompt ==========================================================
 			CursorGotoXY(c2x, c2y, "          ");
 			CursorGotoXY(c2x, c2y);
-			std::cout << angle_degrees;
+			std::cout << angle_degrees << "\n";
 			//=======================================================================================================
 		}
 		
@@ -234,10 +257,11 @@ void siddon_recon::m_mlem_all_iterations()
 {
 		int c1x, c1y, c2x, c2y;
 
-		//this->m_calc_sensitivity();
+		this->m_calc_sensitivity();
 		set_ones<<<this->m_blocks_object, this->m_threads_object>>>(this->md_f);
 
-		std::cout << "====================================================================="<< std::endl;
+		std::cout << "\n";
+		std::cout << "================================="<< std::endl;
 		std::cout << "MLEM recon started..." << std::endl;
 		std::cout << "MLEM loop = ";
 		CursorGetXY(c1x, c1y);
@@ -252,16 +276,16 @@ void siddon_recon::m_mlem_all_iterations()
 			CursorGetXY(c2x, c2y);
 			//=======================================================================================================
 	
-			//this->m_mlem_single_iteration(c2x, c2y);
+			this->m_mlem_single_iteration(c2x, c2y);
 
 			CUDA_SAFE_CALL( cudaMemcpy(&this->m_object[0], this->md_f, this->N_object_voxels*sizeof(float), cudaMemcpyDeviceToHost) );
 
 			savefloat(&this->m_object[0], this->N_object_voxels*sizeof(float), 
 				create_filename(this->m_filepath.ReconFileFolder, this->m_filepath.ReconFileNameRoot, iteration, this->m_filepath.ReconFileSuffix) );
-			std::cout << create_filename(this->m_filepath.ReconFileFolder, this->m_filepath.ReconFileNameRoot, iteration, this->m_filepath.ReconFileSuffix) << std::endl;
 		}
-		std::cout << "\n";
-		std::cout << "completed! \n" << std::endl;
+		std::cout << "completed!" << std::endl;
+		std::cout << "================================="<< std::endl;
+		std::cout << "\n" <<std::endl;
 }
 
 
@@ -280,6 +304,7 @@ void siddon_recon::a_MLEM(std::string outputparameterfilename)
 {
 
 	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+	fix_configfile_suffix(outputparameterfilename);
 
 	if (file_check)
 	{

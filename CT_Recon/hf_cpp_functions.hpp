@@ -130,7 +130,7 @@ string create_filename(std::string folder_root, std::string filename, int image_
 
 enum output_type {write_to_file, do_not_write}; 
 
-inline bool file_exist(const std::string &filename)
+inline bool file_exist(const std::string filename)
 {
 	if (FILE *fp = fopen(filename.c_str(), "rb"))
 	{
@@ -244,6 +244,7 @@ inline bool check_projection_files(unsigned int total_projection_images, Detecto
 
 		if (!file_exist(filename))
 		{
+			std::cout << "error: file => " << filename << "does not exist!" << std::endl;
 			return false;
 		}
 		if ( image_size != file_size(filename.c_str()) )
@@ -268,6 +269,21 @@ void check_folder_path(std::string &folderpath)
 
 	if (folderpath.compare(folderpath.size()-1, 1, "/") != 0)
 		folderpath.append("/");
+}
+
+std::string fix_configfile_suffix(std::string &filename)
+{
+	std::size_t pos = filename.find(".");
+	if (pos != std::string::npos)
+	{
+		filename.replace(pos+1, filename.size()-pos-1, "cfg");
+	}
+	else
+	{
+		filename.append(".cfg");
+	}
+
+	return(filename);
 }
 
 bool check_recon_inputs(osem_subset_inputs &osem_subset, osem_input_values osem_inputs)
