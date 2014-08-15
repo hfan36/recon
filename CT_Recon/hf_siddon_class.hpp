@@ -441,16 +441,18 @@ protected:
 
 void WriteParameterFile::a1_WriteParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
 {
+	std::string parameterfilename = filepath.ReconFileNameRoot+".cfg";
 
 	this->m_file.precision(4);
 	this->m_file.setf( std::ios::fixed, std::ios::floatfield);
-	this->m_file.open( create_filename(filepath.ReconFileFolder, "ParameterFile.cfg") );
+	this->m_file.open( create_filename(filepath.ReconFileFolder, parameterfilename) );
 	this->m_write_calparam(params);
 	this->m_write_det(det);
 	this->m_write_vox(vox);
 	this->m_write_scanparam(scanparam);
 	this->m_write_filepath(filepath);
 	this->m_file.close();
+	std::cout << "Parameter file written to: " << parameterfilename << std::endl;
 }
 
 void WriteParameterFile::a1_WriteParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
@@ -466,6 +468,7 @@ void WriteParameterFile::a1_WriteParameters(std::string parameterfilename, Calib
 	this->m_write_scanparam(scanparam);
 	this->m_write_filepath(filepath);
 	this->m_file.close();
+	std::cout << "Parameter file written to: " << parameterfilename << std::endl;
 }
 
 void WriteParameterFile::m_write_calparam(CalibrationParam params)
