@@ -23,6 +23,8 @@ int main()
 	recon.a1_recon_initiate("CTParameters_042414.h");
 	recon.a_MLEM();
 
+	//changes ready to go yay
+	//8/15/2014
 	//-------------------------------------------------------------------
 
 
