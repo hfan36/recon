@@ -22,6 +22,7 @@ Thumbs.db
 *.ipch
 *.sln
 *.filters
+ipch/
 backward_projection_siddon.cuh
 forward_projection_siddon.cuh
 hf_siddon_device_kernel.cuh
