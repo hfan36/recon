@@ -421,8 +421,8 @@ class WriteParameterFile
 {
 
 public:
-	void a_PrintToFile(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
-	void a_PrintToFile(std::string parameterfilename, CalibrationParam params, Detector det, 
+	void a1_WriteParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
+	void a1_WriteParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
 						VoxVolParam vox, ScanParameters scanparam, 
 						FilePaths filepath);
 
@@ -439,7 +439,7 @@ protected:
 	std::ofstream m_file;
 };
 
-void WriteParameterFile::a_PrintToFile(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
+void WriteParameterFile::a1_WriteParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
 {
 
 	this->m_file.precision(4);
@@ -453,7 +453,7 @@ void WriteParameterFile::a_PrintToFile(CalibrationParam params, Detector det, Vo
 	this->m_file.close();
 }
 
-void WriteParameterFile::a_PrintToFile(std::string parameterfilename, CalibrationParam params, Detector det, 
+void WriteParameterFile::a1_WriteParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
 											VoxVolParam vox, ScanParameters scanparam, 
 											FilePaths filepath)
 {

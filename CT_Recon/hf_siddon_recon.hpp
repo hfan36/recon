@@ -131,7 +131,6 @@ void siddon_recon::a_pull_kernel_threads(dim3 &blocks_image, dim3 &threads_image
 	
 	blocks_object = this->m_blocks_object;
 	threads_object = this->m_threads_object;
-
 }
 
 void siddon_recon::m_correct_filepaths(FilePaths &filepaths)
@@ -273,7 +272,7 @@ void siddon_recon::a_MLEM()
 	if (file_check)
 	{
 		this->m_mlem_all_iterations();
-		this->a_PrintToFile(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		this->a1_WriteParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
 	}
 }
 
@@ -285,7 +284,7 @@ void siddon_recon::a_MLEM(std::string outputparameterfilename)
 	if (file_check)
 	{
 		this->m_mlem_all_iterations();
-		this->a_PrintToFile(outputparameterfilename, this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		this->a1_WriteParameters(outputparameterfilename, this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
 	}
 
 }
