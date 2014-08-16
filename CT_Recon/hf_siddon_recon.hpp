@@ -13,6 +13,7 @@ class siddon_recon : public forward, public backward, public WriteParameterFile
 public:
 	void a1_recon_initiate(std::string configurationfilename);
 	void a1_recon_initiate(std::string folder, std::string configurationfilename);
+	void a1_forward_projection(std::string folder, std::string configurationfilename);
 
 	void a_MLEM(std::string outputparameterfilename);
 	void a_MLEM();
@@ -56,6 +57,7 @@ protected:
 
 	void m_mlem_single_iteration(int c2x, int c2y);
 	void m_mlem_all_iterations();
+	void m_forward_projection();
 
 private:
 	bool allocate_check;
@@ -314,6 +316,33 @@ void siddon_recon::a_MLEM(std::string outputparameterfilename)
 
 }
 
+void siddon_recon::a1_forward_projection(std::string folder, std::string configurationfilename)
+{
+	this->a1_recon_initiate(folder, configurationfilename);
+	check_folder_path(this->m_filepath.sim_ObjFileFolder);
+	std::string objfilename = this->m_filepath.sim_ObjFileFolder + this->m_filepath.sim_ObjFileName;
+	std::cout << "objfilename = " << objfilename << std::endl;
+	std::cout << this->m_filepath.sim_ObjFileFolder << std::endl;
+	std::ifstream::pos_type objfilesize = this->N_object_voxels*sizeof(float);
+	std::cout << "objfilesize = " << objfilesize << std::endl;
+
+
+	if ( !file_exist(objfilename) )
+	{
+		std::cout << "object file does not exist!!" << std::endl;
+		std::cout << "The loaded object filename: " << objfilename << std::endl;
+	}
+	else if ( objfilesize != file_size( objfilename.c_str() ) )
+	{
+		std::cout << "object file size does not match input configuration file!" << std::endl;
+		std::cout << "file size = " << file_size( objfilename.c_str() ) << "bytes" << std::endl;
+		std::cout << "configuration file indicates that it should be = " << objfilesize << "bytes" << std::endl;
+	}
+	else
+	{
+		this->m_forward_projection();
+	}
+}
 
 siddon_recon::~siddon_recon()
 {

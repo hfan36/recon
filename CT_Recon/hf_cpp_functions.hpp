@@ -260,15 +260,19 @@ inline bool check_projection_files(unsigned int total_projection_images, Detecto
 
 void check_folder_path(std::string &folderpath)
 {
-	std::size_t pos = folderpath.find("\\");
-	while(pos != std::string::npos)
+	if ( !folderpath.empty() )
 	{
-		folderpath.replace(pos, 1, "/");
-		pos = folderpath.find("\\");
-	}
+		std::size_t pos = folderpath.find("\\");
+		while(pos != std::string::npos)
+		{
+			folderpath.replace(pos, 1, "/");
+			pos = folderpath.find("\\");
+		}
 
-	if (folderpath.compare(folderpath.size()-1, 1, "/") != 0)
-		folderpath.append("/");
+		if (folderpath.compare(folderpath.size()-1, 1, "/") != 0)
+			folderpath.append("/");
+	}
+	
 }
 
 std::string fix_configfile_suffix(std::string &filename)

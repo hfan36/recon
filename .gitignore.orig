@@ -18,14 +18,16 @@ Thumbs.db
 *.ilk
 *.log
 *.bin
-*.txt
-*.cfg
 *.vcxproj
+*.ipch
 *.sln
 *.filters
 ipch/
+<<<<<<< HEAD
+=======
 *.opensdf
 *.sdf
+>>>>>>> 8-15-2014
 backward_projection_siddon.cuh
 forward_projection_siddon.cuh
 hf_siddon_device_kernel.cuh
