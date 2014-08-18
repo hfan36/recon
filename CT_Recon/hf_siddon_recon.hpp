@@ -7,13 +7,15 @@
 
 #include "hf_siddon_class.hpp"
 #include "RawData.hpp"
+#include <strsafe.h>
+
 
 class siddon_recon : public forward, public backward, public WriteParameterFile
 {
 public:
 	void a1_recon_initiate(std::string configurationfilename);
 	void a1_recon_initiate(std::string folder, std::string configurationfilename);
-	void a1_forward_projection(std::string folder, std::string configurationfilename);
+	void a1_forward_projection(std::string configurationfilefolder, std::string configurationfilename);
 
 	void a_MLEM(std::string outputparameterfilename);
 	void a_MLEM();
@@ -61,6 +63,8 @@ protected:
 
 private:
 	bool allocate_check;
+	bool p_bool_fp_dir;
+
 	float *pd_sensitivity;
 };
 
@@ -141,7 +145,8 @@ void siddon_recon::a_pull_kernel_threads(dim3 &blocks_image, dim3 &threads_image
 void siddon_recon::m_correct_filepaths(FilePaths &filepaths)
 {
 	//get all the slashes checked
-	check_folder_path(filepaths.ProjFileFolder);
+	correct_folder_path(filepaths.ProjFileFolder);
+	correct_folder_path(filepaths.sim_ObjFileFolder);
 
 	if (filepaths.ReconFileFolder.empty())
 	{
@@ -170,6 +175,8 @@ void siddon_recon::m_recon_initiate(std::string configurationfilename)
 	this->m_scanparam.LoadFromConfigFile(configurationfilename);
 	this->m_filepath.LoadFromconfigFile(configurationfilename);
 	m_correct_filepaths(this->m_filepath);
+
+	this->p_bool_fp_dir = directory_exist(this->m_filepath.ProjFileFolder);
 
 	//initiate and allocate functions for common siddon variables
 	this->siddon_var.a1_initiate(this->m_params, this->m_det, this->m_vox);
@@ -205,7 +212,8 @@ void siddon_recon::a1_recon_initiate(std::string configurationfilename)
 
 void siddon_recon::a1_recon_initiate(std::string folder, std::string configurationfilename)
 {
-	check_folder_path(folder);
+
+	correct_folder_path(folder);
 	folder.append(configurationfilename);
 	
 	if (file_exist(folder))
@@ -316,13 +324,14 @@ void siddon_recon::a_MLEM(std::string outputparameterfilename)
 
 }
 
-void siddon_recon::a1_forward_projection(std::string folder, std::string configurationfilename)
+void siddon_recon::a1_forward_projection(std::string configurationfilefolder, std::string configurationfilename)
 {
-	this->a1_recon_initiate(folder, configurationfilename);
-	check_folder_path(this->m_filepath.sim_ObjFileFolder);
+	this->a1_recon_initiate(configurationfilefolder, configurationfilename);
 	std::string objfilename = this->m_filepath.sim_ObjFileFolder + this->m_filepath.sim_ObjFileName;
 	std::ifstream::pos_type objfilesize = this->N_object_voxels*sizeof(float);
 	
+	bool b_create_dir = create_directory(this->m_filepath.ProjFileFolder.c_str());
+
 	if ( !file_exist(objfilename) )
 	{
 		std::cout << "object file does not exist!!" << std::endl;
@@ -334,11 +343,38 @@ void siddon_recon::a1_forward_projection(std::string folder, std::string configu
 		std::cout << "file size = " << file_size( objfilename.c_str() ) << "bytes" << std::endl;
 		std::cout << "configuration file indicates that it should be = " << objfilesize << "bytes" << std::endl;
 	}
-	else
+	else if ( !b_create_dir )
+	{
+		std::cout << "Forward projection not calculated" << std::endl;
+	}
+	else if ( b_create_dir && file_exist(objfilename) && objfilesize & file_size(objfilename.c_str()) )
 	{
 		//this->m_forward_projection();
-		std::cout << "do forward projection of all angles" << std::endl;
+		std::cout << "Do forward projection" << std::endl;
 	}
+	else
+	{
+		std::cout << "Unknown error, good luck" << std::endl;
+	}
+}
+
+void siddon_recon::m_forward_projection()
+{
+	readfloat( &this->m_object[0], this->N_object_voxels*sizeof(float), 
+		create_filename(this->m_filepath.sim_ObjFileFolder, this->m_filepath.sim_ObjFileName) );
+	CUDA_SAFE_CALL( cudaMemcpy( this->md_f, &this->m_object[0], this->N_object_voxels*sizeof(float), cudaMemcpyHostToDevice) );
+
+	for (unsigned int n = 0; n < this->m_scanparam.NumProj; n++)
+	{
+		float angle_degree = (float)n * this->m_scanparam.DeltaAng;
+		this->siddon_var.a_calc_initial_limits(angle_degree, this->m_blocks_image, this->m_threads_image);
+		this->a2_fp_per_angle(this->md_f, this->siddon_var, this->m_blocks_image, this->m_threads_image);
+		CUDA_SAFE_CALL( cudaMemcpy( &this->m_image[0], this->a_Fdevicepointer(), this->N_image_pixels*sizeof(float), cudaMemcpyDeviceToHost) );
+		savefloat( &this->m_image[0], this->N_image_pixels*sizeof(float), 
+			create_filename( this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, n, this->m_filepath.ProjFileSuffix) );
+	}
+		//create a function that outputs string to prompt without having it to go out of control
+
 }
 
 siddon_recon::~siddon_recon()

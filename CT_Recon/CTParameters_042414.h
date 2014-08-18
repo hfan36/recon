@@ -70,7 +70,7 @@ ReconFileSuffix 	= .bin												# Reconstructed file suffix
 ##### File Paths for simulation purposes only #######
 #####################################################
 
-ObjFileFolder			= H:\Visual Studio 2010\CT_Recon\CT_Recon		# H:\Visual Studio 2010\CT_Recon\CT_Recon used to load a voxel volume file
+ObjFileFolder			= H:\Visual Studio 2010\CT_Recon\CT_Recon			# H:\Visual Studio 2010\CT_Recon\CT_Recon used to load a voxel volume file
 ObjFileName				= ball64_float.bin									# used to load a voxel volume file
 
 

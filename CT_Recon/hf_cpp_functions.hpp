@@ -2,7 +2,7 @@
 #define HF_CPP_FUNCTIONS_HPP_
 
 #include <Windows.h>
-
+#include <string>
 
 HANDLE console = GetStdHandle(STD_OUTPUT_HANDLE);
 COORD CursorPosition;
@@ -109,7 +109,7 @@ float degree_to_rad(float degrees)
 }
 
 
-string create_filename (std::string folder_root, std::string filename, int image_number)
+string create_filename(std::string folder_root, std::string filename, int image_number)
 {
 	std::ostringstream num;
 	num << image_number;
@@ -150,6 +150,7 @@ std::ifstream::pos_type file_size(const char* filename)
     in.seekg(0, std::ifstream::end);
     return in.tellg(); 
 }
+
 
 
 struct mlem_input_values
@@ -258,7 +259,7 @@ inline bool check_projection_files(unsigned int total_projection_images, Detecto
 }
 
 
-void check_folder_path(std::string &folderpath)
+void correct_folder_path(std::string &folderpath)
 {
 	if ( !folderpath.empty() )
 	{
@@ -274,6 +275,62 @@ void check_folder_path(std::string &folderpath)
 	}
 	
 }
+
+bool directory_exist(const std::string directory_name)
+{
+	DWORD ftyp = GetFileAttributes(directory_name.c_str());
+	if (ftyp == -1 )
+	{
+		//std::cout << "This directory does NOT exist: " << directory_name << std::endl;
+		return false;
+	}
+	else if (ftyp & FILE_ATTRIBUTE_DIRECTORY)
+	{
+		return true;
+	}
+	else
+	{
+		//std::cout << "This directory does NOT exist: " << directory_name << std::endl;
+		return false;
+	}
+}
+
+
+
+bool create_directory(const std::string directory_name)
+{
+	int tf = directory_exist(directory_name);
+	SECURITY_ATTRIBUTES sa;
+	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+	sa.lpSecurityDescriptor = NULL;
+	sa.bInheritHandle = FALSE;
+
+	char ans;
+	if (tf)
+	{
+		//If The file exist, then return false (directory was not created)
+		return (true);
+	}
+	else 
+	{
+		std::cout << "This directory does NOT exist: " << directory_name << std::endl;
+		std::cout << "Do you want to create it? (y/n): ";
+		std::cin >> ans;
+
+		if ( !std::cin.fail() && ans == 'Y' || ans == 'y' )
+		{
+			CreateDirectory( (LPCSTR)directory_name.c_str(), &sa );
+			std::cout << "directory created" << std::endl;
+			return (true);
+		}
+		else
+		{
+			std::cout << "directory was not created" << std::endl;
+			return (false);
+		}
+	}
+}
+
 
 std::string fix_configfile_suffix(std::string &filename)
 {
