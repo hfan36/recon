@@ -27,9 +27,9 @@ AxPixDim	= 0.0065  	# 0.0065 , 0.013 millimeters, Dimension of pixel in Axial di
 ## Voxel Volume Parameters ##
 #############################
 
-Xdim		= 128		# Number of voxels in x direction (unsigned int)
-Ydim		= 128		# Number of voxels in y direction (unsigned int)
-Zdim		= 4			# Number of voxels in z direction (unsigned int)
+Xdim		= 64		# Number of voxels in x direction (unsigned int)
+Ydim		= 64		# Number of voxels in y direction (unsigned int)
+Zdim		= 64			# Number of voxels in z direction (unsigned int)
 XVoxSize	= 0.2 		# 1.5789  millimeters, size of voxel element in x direction (float)
 YVoxSize	= 0.2		# 1.5789  millimeters, size of voxel element in y direction (float)
 ZVoxSize	= 0.2		# 1.5789  millimeters, size of voxel element in z direction (float)

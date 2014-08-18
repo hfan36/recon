@@ -321,12 +321,8 @@ void siddon_recon::a1_forward_projection(std::string folder, std::string configu
 	this->a1_recon_initiate(folder, configurationfilename);
 	check_folder_path(this->m_filepath.sim_ObjFileFolder);
 	std::string objfilename = this->m_filepath.sim_ObjFileFolder + this->m_filepath.sim_ObjFileName;
-	std::cout << "objfilename = " << objfilename << std::endl;
-	std::cout << this->m_filepath.sim_ObjFileFolder << std::endl;
 	std::ifstream::pos_type objfilesize = this->N_object_voxels*sizeof(float);
-	std::cout << "objfilesize = " << objfilesize << std::endl;
-
-
+	
 	if ( !file_exist(objfilename) )
 	{
 		std::cout << "object file does not exist!!" << std::endl;
@@ -340,7 +336,8 @@ void siddon_recon::a1_forward_projection(std::string folder, std::string configu
 	}
 	else
 	{
-		this->m_forward_projection();
+		//this->m_forward_projection();
+		std::cout << "do forward projection of all angles" << std::endl;
 	}
 }
 
