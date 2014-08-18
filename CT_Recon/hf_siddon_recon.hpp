@@ -13,12 +13,13 @@
 class siddon_recon : public forward, public backward, public WriteParameterFile
 {
 public:
-	void a1_recon_initiate(std::string configurationfilename);
-	void a1_recon_initiate(std::string folder, std::string configurationfilename);
+	void a0_recon_mlem(std::string configurationfilename, std::string outputparameterfilename);
+	void a0_recon_mlem(std::string configurationfilename);
+	void a0_recon_mlem(std::string configurationfilefolder, std::string configruationfilename,
+						std::string outputparameterfilename);
+
 	void a1_forward_projection(std::string configurationfilefolder, std::string configurationfilename);
 
-	void a_MLEM(std::string outputparameterfilename);
-	void a_MLEM();
 
 	float *a_pull_recon_pointer();
 	float *a_dsensitivity_pointer();
@@ -30,7 +31,6 @@ public:
 	dim3 a_blocks_atomic, a_threads_atomic;
 	int N_image_pixels;
 	int N_object_voxels;
-	siddon_commons siddon_var;
 
 	~siddon_recon();
 	
@@ -51,12 +51,15 @@ protected:
 	dim3 m_blocks_image, m_threads_image;
 	dim3 m_blocks_object, m_threads_object;
 	dim3 m_blocks_atomic, m_threads_atomic;
+	siddon_commons m_siddon_var;
+
+	void m1_recon_initiate(std::string configurationfilename);
+	void m1_recon_initiate(std::string folder, std::string configurationfilename);
 
 	void m_recon_initiate(std::string configurationfilename);
 	void m_calc_sensitivity();
 	void m_calc_kernel_threads();
 	void m_correct_filepaths(FilePaths &filepaths);
-
 	void m_mlem_single_iteration(int c2x, int c2y);
 	void m_mlem_all_iterations();
 	void m_forward_projection();
@@ -82,8 +85,8 @@ void siddon_recon::m_calc_sensitivity()
 	{
 		angle_degree = this->m_scanparam.DeltaAng*(float)n;
 
-		this->siddon_var.a_calc_initial_limits(angle_degree, this->m_blocks_image, this->m_threads_image);
-		this->a2_bp_per_angle(md_g_data, siddon_var, this->m_blocks_image, this->m_threads_image, this->m_blocks_object, this->m_threads_object, this->m_blocks_atomic, this->m_threads_atomic);
+		this->m_siddon_var.a_calc_initial_limits(angle_degree, this->m_blocks_image, this->m_threads_image);
+		this->a2_bp_per_angle(md_g_data, m_siddon_var, this->m_blocks_image, this->m_threads_image, this->m_blocks_object, this->m_threads_object, this->m_blocks_atomic, this->m_threads_atomic);
 		siddon_add_bp<<<this->m_blocks_object, this->m_threads_object>>>( this->pd_sensitivity, this->a_bpdevicepointer() );
 		
 		//CUDA_SAFE_CALL( cudaMemcpy(&this->m_object[0], this->pd_sensitivity, this->N_object_voxels*sizeof(float), cudaMemcpyDeviceToHost) );
@@ -179,10 +182,10 @@ void siddon_recon::m_recon_initiate(std::string configurationfilename)
 	this->p_bool_fp_dir = directory_exist(this->m_filepath.ProjFileFolder);
 
 	//initiate and allocate functions for common siddon variables
-	this->siddon_var.a1_initiate(this->m_params, this->m_det, this->m_vox);
-	this->siddon_var.a2_allocate();
-	this->N_image_pixels = this->siddon_var.N_image_pixels;
-	this->N_object_voxels = this->siddon_var.N_object_voxels;
+	this->m_siddon_var.a1_initiate(this->m_params, this->m_det, this->m_vox);
+	this->m_siddon_var.a2_allocate();
+	this->N_image_pixels = this->m_siddon_var.N_image_pixels;
+	this->N_object_voxels = this->m_siddon_var.N_object_voxels;
 
 	//initiate and allocate functions to do forward and backward projection
 	this->a1_Binitiate(this->N_object_voxels, this->N_image_pixels);
@@ -202,7 +205,7 @@ void siddon_recon::m_recon_initiate(std::string configurationfilename)
 
 }
 
-void siddon_recon::a1_recon_initiate(std::string configurationfilename)
+void siddon_recon::m1_recon_initiate(std::string configurationfilename)
 {
 	if (file_exist(configurationfilename))
 	{
@@ -210,7 +213,7 @@ void siddon_recon::a1_recon_initiate(std::string configurationfilename)
 	}
 }
 
-void siddon_recon::a1_recon_initiate(std::string folder, std::string configurationfilename)
+void siddon_recon::m1_recon_initiate(std::string folder, std::string configurationfilename)
 {
 
 	correct_folder_path(folder);
@@ -237,16 +240,16 @@ void siddon_recon::m_mlem_single_iteration(int c2x, int c2y)
 				CUDA_SAFE_CALL( cudaMemcpy(this->md_g_data, &this->m_image[0], this->N_image_pixels*sizeof(float), cudaMemcpyHostToDevice) );
 
 			//siddon algorithm initial numbers that'll be used for both forward and backward projections per angle
-			this->siddon_var.a_calc_initial_limits(angle_degrees, this->m_blocks_image, this->m_threads_image);
+			this->m_siddon_var.a_calc_initial_limits(angle_degrees, this->m_blocks_image, this->m_threads_image);
 
 			// Hf
-			this->a2_fp_per_angle(this->md_f, this->siddon_var, this->m_blocks_image, this->m_threads_image);
+			this->a2_fp_per_angle(this->md_f, this->m_siddon_var, this->m_blocks_image, this->m_threads_image);
 
 			// g/Hf
 			divide1<float><<<this->m_blocks_image, this->m_threads_image>>>(this->md_g_data, this->a_Fdevicepointer());
 
 			// Ht (g/Hf)
-			this->a2_bp_per_angle(this->md_g_data, this->siddon_var, this->m_blocks_image, this->m_threads_image, this->m_blocks_object, this->m_threads_object, this->m_blocks_atomic, this->m_threads_atomic);
+			this->a2_bp_per_angle(this->md_g_data, this->m_siddon_var, this->m_blocks_image, this->m_threads_image, this->m_blocks_object, this->m_threads_object, this->m_blocks_atomic, this->m_threads_atomic);
 			siddon_add_bp<<<this->m_blocks_object, this->m_threads_object>>>(this->md_Ht_fscale, this->a_bpdevicepointer() );
 
 
@@ -299,8 +302,9 @@ void siddon_recon::m_mlem_all_iterations()
 }
 
 
-void siddon_recon::a_MLEM()
+void siddon_recon::a0_recon_mlem(std::string configurationfilefolder, std::string configurationfilename)
 {
+	this->m1_recon_initiate(configurationfilefolder, configurationfilename);
 	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
 
 	if (file_check)
@@ -310,9 +314,21 @@ void siddon_recon::a_MLEM()
 	}
 }
 
-void siddon_recon::a_MLEM(std::string outputparameterfilename)
+void siddon_recon::a0_recon_mlem(std::string configurationfilename)
 {
+	this->m1_recon_initiate(configurationfilename);
+	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
 
+	if (file_check)
+	{
+		this->m_mlem_all_iterations();
+		this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+	}
+}
+
+void siddon_recon::a0_recon_mlem(std::string configurationfilefolder, std::string configurationfilename, std::string outputparameterfilename)
+{
+	this->m1_recon_initiate(configurationfilefolder, configurationfilename);
 	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
 	fix_configfile_suffix(outputparameterfilename);
 
@@ -326,7 +342,7 @@ void siddon_recon::a_MLEM(std::string outputparameterfilename)
 
 void siddon_recon::a1_forward_projection(std::string configurationfilefolder, std::string configurationfilename)
 {
-	this->a1_recon_initiate(configurationfilefolder, configurationfilename);
+	this->m1_recon_initiate(configurationfilefolder, configurationfilename);
 	std::string objfilename = this->m_filepath.sim_ObjFileFolder + this->m_filepath.sim_ObjFileName;
 	std::ifstream::pos_type objfilesize = this->N_object_voxels*sizeof(float);
 	
@@ -373,8 +389,8 @@ void siddon_recon::m_forward_projection()
 	for (unsigned int n = 0; n < this->m_scanparam.NumProj; n++)
 	{
 		float angle_degree = (float)n * this->m_scanparam.DeltaAng;
-		this->siddon_var.a_calc_initial_limits(angle_degree, this->m_blocks_image, this->m_threads_image);
-		this->a2_fp_per_angle(this->md_f, this->siddon_var, this->m_blocks_image, this->m_threads_image);
+		this->m_siddon_var.a_calc_initial_limits(angle_degree, this->m_blocks_image, this->m_threads_image);
+		this->a2_fp_per_angle(this->md_f, this->m_siddon_var, this->m_blocks_image, this->m_threads_image);
 		CUDA_SAFE_CALL( cudaMemcpy( &this->m_image[0], this->a_Fdevicepointer(), this->N_image_pixels*sizeof(float), cudaMemcpyDeviceToHost) );
 		savefloat( &this->m_image[0], this->N_image_pixels*sizeof(float), 
 			create_filename( this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, n, this->m_filepath.ProjFileSuffix) );
@@ -394,7 +410,7 @@ siddon_recon::~siddon_recon()
 {
 	if (allocate_check)
 	{
-		siddon_var.a3_deallocate();
+		m_siddon_var.a3_deallocate();
 		this->m_image.clear();
 		this->m_object.clear();
 		CUDA_SAFE_CALL( cudaFree(this->md_f) );
@@ -448,17 +464,17 @@ siddon_recon::~siddon_recon()
 //			CUDA_SAFE_CALL( cudaMemcpy(this->md_g_data, &this->m_image[0], this->N_image_pixels*sizeof(float), cudaMemcpyHostToDevice) );
 //
 //			//siddon algorithm initial numbers that'll be used for both forward and backward projections per angle
-//			this->siddon_var.a_calc_initial_limits(angle_degrees, this->m_blocks_image, this->m_threads_image);
-//			//std::cout << "loopN = " << siddon_var.loopN << "\t angle = " << angle_degrees << std::endl; 
+//			this->m_siddon_var.a_calc_initial_limits(angle_degrees, this->m_blocks_image, this->m_threads_image);
+//			//std::cout << "loopN = " << m_siddon_var.loopN << "\t angle = " << angle_degrees << std::endl; 
 //
 //			// Hf
-//			this->a2_fp_per_angle(this->md_f, this->siddon_var, this->m_blocks_image, this->m_threads_image);
+//			this->a2_fp_per_angle(this->md_f, this->m_siddon_var, this->m_blocks_image, this->m_threads_image);
 //
 //			// g/Hf
 //			divide1<float><<<this->m_blocks_image, this->m_threads_image>>>(this->md_g_data, this->a_Fdevicepointer());
 //
 //			// Ht (g/Hf)
-//			this->a2_bp_per_angle(this->md_g_data, this->siddon_var, this->m_blocks_image, this->m_threads_image, this->m_blocks_object, this->m_threads_object, this->m_blocks_atomic, this->m_threads_atomic);
+//			this->a2_bp_per_angle(this->md_g_data, this->m_siddon_var, this->m_blocks_image, this->m_threads_image, this->m_blocks_object, this->m_threads_object, this->m_blocks_atomic, this->m_threads_atomic);
 //			siddon_add_bp<<<this->m_blocks_object, this->m_threads_object>>>(this->md_Ht_fscale, this->a_bpdevicepointer() );
 //
 //
