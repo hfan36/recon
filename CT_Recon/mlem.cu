@@ -21,10 +21,7 @@ int main()
 	siddon_recon recon;
 	//recon.a1_forward_projection("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "CTParameters_042414.h");
 	recon.a0_recon_mlem("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon\\ball", "fp_ball64.cfg");
-
 	//-------------------------------------------------------------------
-
-
 
 	//------- just backprojection--------------------------------------
 	//dim3 threads_image, blocks_image, threads_object, blocks_object, threads_atomic, blocks_atomic;
