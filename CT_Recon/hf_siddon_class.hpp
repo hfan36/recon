@@ -421,10 +421,14 @@ class WriteParameterFile
 {
 
 public:
-	void a1_WriteParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
-	void a1_WriteParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
-						VoxVolParam vox, ScanParameters scanparam, 
-						FilePaths filepath);
+	void a1_WriteReconParameters(	std::string parameterfilename, CalibrationParam params, Detector det, 
+									VoxVolParam vox, ScanParameters scanparam, 
+									FilePaths filepath);
+	void a1_WriteReconParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
+	void a1_WriteForwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
+	void a1_WriteForwardParameters(	std::string parameterfilename, CalibrationParam params, Detector det, 
+									VoxVolParam vox, ScanParameters scanparam, 
+									FilePaths filepath);
 
 
 	~WriteParameterFile();
@@ -439,7 +443,7 @@ protected:
 	std::ofstream m_file;
 };
 
-void WriteParameterFile::a1_WriteParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
+void WriteParameterFile::a1_WriteReconParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
 {
 	std::string parameterfilename = filepath.ReconFileNameRoot+".cfg";
 
@@ -455,13 +459,45 @@ void WriteParameterFile::a1_WriteParameters(CalibrationParam params, Detector de
 	std::cout << "Parameter file written to: " << parameterfilename << std::endl;
 }
 
-void WriteParameterFile::a1_WriteParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
+void WriteParameterFile::a1_WriteReconParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
 											VoxVolParam vox, ScanParameters scanparam, 
 											FilePaths filepath)
 {
 	this->m_file.precision(4);
 	this->m_file.setf( std::ios::fixed, std::ios::floatfield);
 	this->m_file.open( create_filename(filepath.ReconFileFolder, parameterfilename) );
+	this->m_write_calparam(params);
+	this->m_write_det(det);
+	this->m_write_vox(vox);
+	this->m_write_scanparam(scanparam);
+	this->m_write_filepath(filepath);
+	this->m_file.close();
+	std::cout << "Parameter file written to: " << parameterfilename << std::endl;
+}
+
+void WriteParameterFile::a1_WriteForwardParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
+											VoxVolParam vox, ScanParameters scanparam, 
+											FilePaths filepath)
+{
+	this->m_file.precision(4);
+	this->m_file.setf( std::ios::fixed, std::ios::floatfield);
+	this->m_file.open( create_filename(filepath.ProjFileFolder, parameterfilename) );
+	this->m_write_calparam(params);
+	this->m_write_det(det);
+	this->m_write_vox(vox);
+	this->m_write_scanparam(scanparam);
+	this->m_write_filepath(filepath);
+	this->m_file.close();
+	std::cout << "Parameter file written to: " << parameterfilename << std::endl;
+}
+
+void WriteParameterFile::a1_WriteForwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
+{
+	std::string parameterfilename = filepath.ProjFileNameRoot+".cfg";
+
+	this->m_file.precision(4);
+	this->m_file.setf( std::ios::fixed, std::ios::floatfield);
+	this->m_file.open( create_filename(filepath.ProjFileFolder, parameterfilename) );
 	this->m_write_calparam(params);
 	this->m_write_det(det);
 	this->m_write_vox(vox);
@@ -536,7 +572,16 @@ void WriteParameterFile::m_write_filepath(FilePaths filepath)
 	this->m_file << "ReconFileFolder \t\t = " << filepath.ReconFileFolder << "\n";
 	this->m_file << "ReconFileNameRoot \t\t = " << filepath.ReconFileNameRoot << "\n";
 	this->m_file << "ReconFileSuffix \t\t = " << filepath.ReconFileSuffix << "\n";
+	this->m_file << "\n\n";
+
+	this->m_file << "########################################################### \n";
+	this->m_file << "######### File Paths for simulation purpose only ########## \n";
+	this->m_file << "########################################################### \n\n";
+	this->m_file << "ObjFileFolder \t\t\t = " << filepath.sim_ObjFileFolder << "\n";
+	this->m_file << "ObjFileName \t\t\t = " << filepath.sim_ObjFileName << "\n";
+	this->m_file << "\n\n";
 }
+
 
 WriteParameterFile::~WriteParameterFile()
 {
