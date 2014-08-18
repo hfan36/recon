@@ -306,7 +306,7 @@ void siddon_recon::a_MLEM()
 	if (file_check)
 	{
 		this->m_mlem_all_iterations();
-		this->a1_WriteParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
 	}
 }
 
@@ -319,7 +319,7 @@ void siddon_recon::a_MLEM(std::string outputparameterfilename)
 	if (file_check)
 	{
 		this->m_mlem_all_iterations();
-		this->a1_WriteParameters(outputparameterfilename, this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		this->a1_WriteReconParameters(outputparameterfilename, this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
 	}
 
 }
@@ -349,12 +349,13 @@ void siddon_recon::a1_forward_projection(std::string configurationfilefolder, st
 	}
 	else if ( b_create_dir && file_exist(objfilename) && objfilesize & file_size(objfilename.c_str()) )
 	{
-		//this->m_forward_projection();
-		std::cout << "Do forward projection" << std::endl;
+		this->m_forward_projection();
+		this->a1_WriteForwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		//std::cout << "Do forward projection" << std::endl;
 	}
 	else
 	{
-		std::cout << "Unknown error, good luck" << std::endl;
+		std::cout << "Unknown error, good luck finding it" << std::endl;
 	}
 }
 
@@ -364,6 +365,11 @@ void siddon_recon::m_forward_projection()
 		create_filename(this->m_filepath.sim_ObjFileFolder, this->m_filepath.sim_ObjFileName) );
 	CUDA_SAFE_CALL( cudaMemcpy( this->md_f, &this->m_object[0], this->N_object_voxels*sizeof(float), cudaMemcpyHostToDevice) );
 
+	int x, y;
+	std::cout << "================================="<< std::endl;
+	std::cout << "Forward Projection started" << std::endl;
+	std::cout << "Projection angle (degrees) = \t";
+	CursorGetXY(x, y);
 	for (unsigned int n = 0; n < this->m_scanparam.NumProj; n++)
 	{
 		float angle_degree = (float)n * this->m_scanparam.DeltaAng;
@@ -372,8 +378,15 @@ void siddon_recon::m_forward_projection()
 		CUDA_SAFE_CALL( cudaMemcpy( &this->m_image[0], this->a_Fdevicepointer(), this->N_image_pixels*sizeof(float), cudaMemcpyDeviceToHost) );
 		savefloat( &this->m_image[0], this->N_image_pixels*sizeof(float), 
 			create_filename( this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, n, this->m_filepath.ProjFileSuffix) );
+		
+		//for display to prompt
+		CursorGotoXY(x, y, "           ");
+		CursorGotoXY(x, y);
+		std::cout << angle_degree << std::endl;
 	}
-		//create a function that outputs string to prompt without having it to go out of control
+	std::cout << "completed!" << std::endl;
+	std::cout << "================================="<< std::endl;
+	std::cout << "\n" <<std::endl;
 
 }
 

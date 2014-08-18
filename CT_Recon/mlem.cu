@@ -19,8 +19,7 @@ int main()
 	
 	//----------------reconstruction part--------------------------------
 	siddon_recon recon;
-	recon.a1_forward_projection("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon",
-		"CTParameters_042414.h");
+	recon.a1_forward_projection("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "CTParameters_042414.h");
 	//recon.a_MLEM();
 
 
