@@ -145,8 +145,8 @@ public:
 
 protected:
 
-	float *md_image_temp;
-	float *md_image;
+	float *md_fp_image_temp;
+	float *md_fp_image;
 
 	void m_zero_image_temp();
 	void m_zero_image();
@@ -162,7 +162,7 @@ void forward::m_zero_image_temp()
 {
 	if (this->pcheck)
 	{
-		CUDA_SAFE_CALL( cudaMemset( this->md_image_temp, 0, pN_pixels*sizeof(float) ) );
+		CUDA_SAFE_CALL( cudaMemset( this->md_fp_image_temp, 0, pN_pixels*sizeof(float) ) );
 	}
 	else
 	{
@@ -174,7 +174,7 @@ void forward::m_zero_image()
 {
 	if (this->pcheck)
 	{
-		CUDA_SAFE_CALL( cudaMemset( md_image, 0, pN_pixels*sizeof(float) ) );
+		CUDA_SAFE_CALL( cudaMemset( md_fp_image, 0, pN_pixels*sizeof(float) ) );
 	}
 	else
 	{
@@ -187,8 +187,8 @@ void forward::m_zero_image()
 void forward::a1_Finitiate(int N_image_pixels)
 {
 	this->pN_pixels = N_image_pixels;
-	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_image_temp, this->pN_pixels*sizeof(float) ) );
-	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_image, this->pN_pixels*sizeof(float) ) );
+	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_fp_image_temp, this->pN_pixels*sizeof(float) ) );
+	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_fp_image, this->pN_pixels*sizeof(float) ) );
 	this->pcheck = true;
 }
 
@@ -210,31 +210,31 @@ void forward::a2_fp_per_angle(float *d_object, siddon_commons &siddon_var, dim3 
 
 		siddon_fp_calc_ray_path<<<blocks_image, threads_image>>>(	siddon_var.system, siddon_var.p1, siddon_var.p2, siddon_var.d_index,
 																	siddon_var.d_current_alpha, siddon_var.d_next_alpha, siddon_var.d_d12, 
-																	siddon_var.d_mask, this->md_image_temp, d_object);
+																	siddon_var.d_mask, this->md_fp_image_temp, d_object);
 
-		siddon_add <<<blocks_image, threads_image >>>(this->md_image, this->md_image_temp);
+		siddon_add <<<blocks_image, threads_image >>>(this->md_fp_image, this->md_fp_image_temp);
 	}
 
 	this->m_zero_image_temp();
 
 	siddon_fp_end <<<blocks_image, threads_image >>>(	siddon_var.d_alpha_max, siddon_var.d_d12, siddon_var.d_mask,
 														siddon_var.system, siddon_var.p1, siddon_var.p2, siddon_var.d_index,
-														siddon_var.d_current_alpha, this->md_image_temp, d_object	);		
+														siddon_var.d_current_alpha, this->md_fp_image_temp, d_object	);		
 
-	siddon_add <<<blocks_image, threads_image >>>(this->md_image, this->md_image_temp);
+	siddon_add <<<blocks_image, threads_image >>>(this->md_fp_image, this->md_fp_image_temp);
 }
 
 float *forward::a_Fdevicepointer()
 {
-	return(this->md_image);
+	return(this->md_fp_image);
 }
 
 forward::~forward()
 {
 	if (this->pcheck)
 	{
-		CUDA_SAFE_CALL( cudaFree(this->md_image) );
-		CUDA_SAFE_CALL( cudaFree(this->md_image_temp) );
+		CUDA_SAFE_CALL( cudaFree(this->md_fp_image) );
+		CUDA_SAFE_CALL( cudaFree(this->md_fp_image_temp) );
 	}
 	else
 	{
@@ -257,10 +257,10 @@ public:
 	~backward();
 
 protected:
-	float *md_object_temp;
-	float *md_object;
-	int *md_object_index;
-	float *md_image_value;
+	float *md_bp_object_temp;
+	float *md_bp_object;
+	int *md_bp_object_index;
+	float *md_bp_image_value;
 	
 	void m_zero_object_temp();
 	void m_zero_object();
@@ -277,7 +277,7 @@ void backward::m_zero_object_temp()
 {
 	if (this->pcheck)
 	{
-		CUDA_SAFE_CALL( cudaMemset( md_object_temp, 0, this->pN_voxels_pad*sizeof(float) ) );
+		CUDA_SAFE_CALL( cudaMemset( md_bp_object_temp, 0, this->pN_voxels_pad*sizeof(float) ) );
 	}
 	else
 	{
@@ -289,7 +289,7 @@ void backward::m_zero_object()
 {
 	if (this->pcheck)
 	{
-		CUDA_SAFE_CALL( cudaMemset( this->md_object, 0, this->pN_voxels_pad*sizeof(float) ) );
+		CUDA_SAFE_CALL( cudaMemset( this->md_bp_object, 0, this->pN_voxels_pad*sizeof(float) ) );
 	}
 	else
 	{
@@ -302,10 +302,10 @@ void backward::a1_Binitiate(int N_object_voxels, int N_image_pixels)
 {
 	this->pN_voxels = N_object_voxels;
 	this->pN_voxels_pad = N_object_voxels + 1;
-	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_object_temp, this->pN_voxels_pad*sizeof(float) ) );
-	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_object, this->pN_voxels_pad*sizeof(float) ) );
-	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_object_index, N_image_pixels*sizeof(int) ) );
-	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_image_value, N_image_pixels*sizeof(float) ) );
+	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_bp_object_temp, this->pN_voxels_pad*sizeof(float) ) );
+	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_bp_object, this->pN_voxels_pad*sizeof(float) ) );
+	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_bp_object_index, N_image_pixels*sizeof(int) ) );
+	CUDA_SAFE_CALL( cudaMalloc( (void**)&this->md_bp_image_value, N_image_pixels*sizeof(float) ) );
 
 	this->pcheck = true;
 }
@@ -328,37 +328,37 @@ void backward::a2_bp_per_angle(	float *d_image, siddon_commons &siddon_var,
 															siddon_var.d_alpha_max, siddon_var.d_alpha_min);
 
 		siddon_bp_calc_ray_path<<<blocks_image, threads_image>>>(	siddon_var.system, siddon_var.p1, siddon_var.p2, siddon_var.d_index,
-																	this->md_object_index, siddon_var.d_current_alpha, siddon_var.d_next_alpha, 
-																	siddon_var.d_d12, siddon_var.d_mask, d_image, this->md_image_value );
-		kernel<<<blocks_atomic, threads_atomic>>>(this->md_object_temp, this->md_object_index, this->md_image_value, siddon_var.N_image_pixels);
-		siddon_add_bp<<<blocks_object, threads_object>>>(this->md_object, this->md_object_temp);
+																	this->md_bp_object_index, siddon_var.d_current_alpha, siddon_var.d_next_alpha, 
+																	siddon_var.d_d12, siddon_var.d_mask, d_image, this->md_bp_image_value );
+		kernel<<<blocks_atomic, threads_atomic>>>(this->md_bp_object_temp, this->md_bp_object_index, this->md_bp_image_value, siddon_var.N_image_pixels);
+		siddon_add_bp<<<blocks_object, threads_object>>>(this->md_bp_object, this->md_bp_object_temp);
 	}
 	
 	this->m_zero_object_temp();
 
 	siddon_bp_end<<<blocks_image, threads_image>>>(	siddon_var.d_alpha_max, siddon_var.d_d12, siddon_var.d_mask,
 													siddon_var.system, siddon_var.p1, siddon_var.p2, siddon_var.d_index,
-													this->md_object_index, siddon_var.d_current_alpha, d_image, this->md_image_value);		
+													this->md_bp_object_index, siddon_var.d_current_alpha, d_image, this->md_bp_image_value);		
 	
-	kernel<<<blocks_atomic, threads_atomic>>>(this->md_object_temp, this->md_object_index, this->md_image_value, siddon_var.N_image_pixels);
+	kernel<<<blocks_atomic, threads_atomic>>>(this->md_bp_object_temp, this->md_bp_object_index, this->md_bp_image_value, siddon_var.N_image_pixels);
 
-	siddon_add_bp<<<blocks_object, threads_object>>>(this->md_object, this->md_object_temp);
+	siddon_add_bp<<<blocks_object, threads_object>>>(this->md_bp_object, this->md_bp_object_temp);
 
 }
 
 float *backward::a_bpdevicepointer()
 {
-	return(this->md_object);
+	return(this->md_bp_object);
 }
 
 backward::~backward()
 {
 	if(pcheck)
 	{
-		CUDA_SAFE_CALL( cudaFree(this->md_object_temp) );
-		CUDA_SAFE_CALL( cudaFree(this->md_object) );
-		CUDA_SAFE_CALL( cudaFree(this->md_image_value) );
-		CUDA_SAFE_CALL( cudaFree(this->md_object_index) );
+		CUDA_SAFE_CALL( cudaFree(this->md_bp_object_temp) );
+		CUDA_SAFE_CALL( cudaFree(this->md_bp_object) );
+		CUDA_SAFE_CALL( cudaFree(this->md_bp_image_value) );
+		CUDA_SAFE_CALL( cudaFree(this->md_bp_object_index) );
 	}
 	else
 	{
@@ -398,7 +398,7 @@ void sensitivity::a3S_calculate(siddon_commons &siddon_var, dim3 blocks_image, d
 	{
 		siddon_var.a_calc_initial_limits((float)n, blocks_image, threads_image);
 		this->a2_bp_per_angle(pd_ones, siddon_var, blocks_image, threads_image, blocks_object, threads_object, blocks_atomic, threads_atomic);
-		siddon_add_bp<<<blocks_object, threads_object>>>(pd_sensitivity, md_object);
+		siddon_add_bp<<<blocks_object, threads_object>>>(pd_sensitivity, md_bp_object);
 		std::cout << "sensitivity at " << n << "angles" << std::endl;
 	}
 	std::cout << "sensitivity calculated, yepee!" << std::endl;

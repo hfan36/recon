@@ -61,8 +61,8 @@ protected:
 	dim3 m_blocks_atomic, m_threads_atomic;
 	siddon_commons m_siddon_var;
 
-	void m1_recon_initiate(std::string configurationfilename);
-	void m1_recon_initiate(std::string folder, std::string configurationfilename);
+	bool m1_recon_initiate(std::string configurationfilename);
+	bool m1_recon_initiate(std::string folder, std::string configurationfilename);
 	void m_recon_initiate(std::string configurationfilename);
 
 
@@ -79,6 +79,7 @@ protected:
 private:
 	bool p_allocate_check;
 	bool p_bool_fp_dir;
+	bool p_initiate_check;
 
 	float *pd_sensitivity;
 };
@@ -86,87 +87,124 @@ private:
 // main public functions
 void siddon_recon::a0_recon_mlem(std::string configurationfilefolder, std::string configurationfilename)
 {
-	this->m1_recon_initiate(configurationfilefolder, configurationfilename);
-	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
-
-	if (file_check)
+	bool check_startup = this->m1_recon_initiate(configurationfilefolder, configurationfilename);
+	if (check_startup)
 	{
-		this->m_mlem_all_iterations();
-		this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+
+		if (file_check)
+		{
+			this->m_mlem_all_iterations();
+			this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		}
+	}
+	else
+	{
+		std::cout << "Error, so did nothing" << std::endl;
 	}
 }
 
 void siddon_recon::a0_recon_mlem(std::string configurationfilename)
 {
-	this->m1_recon_initiate(configurationfilename);
-	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
-
-	if (file_check)
+	bool check_startup = this->m1_recon_initiate(configurationfilename);
+	if (check_startup)
 	{
-		this->m_mlem_all_iterations();
-		this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+
+		if (file_check)
+		{
+			this->m_mlem_all_iterations();
+			this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		}
+	}
+	else
+	{
+		std::cout << "Error, so did nothing" << std::endl;
 	}
 }
 
 void siddon_recon::a0_recon_mlem(std::string configurationfilefolder, std::string configurationfilename, std::string outputparameterfilename)
 {
-	this->m1_recon_initiate(configurationfilefolder, configurationfilename);
-	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
-	fix_configfile_suffix(outputparameterfilename);
-
-	if (file_check)
+	bool check_startup = this->m1_recon_initiate(configurationfilefolder, configurationfilename);
+	if (check_startup)
 	{
-		this->m_mlem_all_iterations();
-		this->a1_WriteReconParameters(outputparameterfilename, this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
-	}
+		bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+		fix_configfile_suffix(outputparameterfilename);
 
+		if (file_check)
+		{
+			this->m_mlem_all_iterations();
+			this->a1_WriteReconParameters(outputparameterfilename, this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		}
+	}
+	else
+	{
+		std::cout << "Error, so did nothing" << std::endl;
+	}
 }
 
 void siddon_recon::a1_forward_projection(std::string configurationfilefolder, std::string configurationfilename)
 {
-	this->m1_recon_initiate(configurationfilefolder, configurationfilename);
-	std::string objfilename = this->m_filepath.sim_ObjFileFolder + this->m_filepath.sim_ObjFileName;
-	std::ifstream::pos_type objfilesize = this->m_siddon_var.N_object_voxels*sizeof(float);
-	
-	bool b_create_dir = create_directory(this->m_filepath.ProjFileFolder.c_str());
 
-	if ( !file_exist(objfilename) )
+	bool startup_check = this->m1_recon_initiate(configurationfilefolder, configurationfilename);
+	
+	if (startup_check)
 	{
-		std::cout << "object file does not exist!!" << std::endl;
-		std::cout << "The loaded object filename: " << objfilename << std::endl;
-	}
-	else if ( objfilesize != file_size( objfilename.c_str() ) )
-	{
-		std::cout << "object file size does not match input configuration file!" << std::endl;
-		std::cout << "file size = " << file_size( objfilename.c_str() ) << "bytes" << std::endl;
-		std::cout << "configuration file indicates that it should be = " << objfilesize << "bytes" << std::endl;
-	}
-	else if ( !b_create_dir )
-	{
-		std::cout << "Forward projection not calculated" << std::endl;
-	}
-	else if ( b_create_dir && file_exist(objfilename) && objfilesize & file_size(objfilename.c_str()) )
-	{
-		this->m_forward_projection();
-		this->a1_WriteForwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
-		//std::cout << "Do forward projection" << std::endl;
+		std::string objfilename = this->m_filepath.sim_ObjFileFolder + this->m_filepath.sim_ObjFileName;
+		std::ifstream::pos_type objfilesize = this->m_siddon_var.N_object_voxels*sizeof(float);
+	
+		bool b_create_dir = create_directory(this->m_filepath.ProjFileFolder.c_str());
+
+		if ( !file_exist(objfilename) )
+		{
+			std::cout << "object file does not exist!!" << std::endl;
+			std::cout << "The loaded object filename: " << objfilename << std::endl;
+		}
+		else if ( objfilesize != file_size( objfilename.c_str() ) )
+		{
+			std::cout << "object file size does not match input configuration file!" << std::endl;
+			std::cout << "file size = " << file_size( objfilename.c_str() ) << "bytes" << std::endl;
+			std::cout << "configuration file indicates that it should be = " << objfilesize << "bytes" << std::endl;
+		}
+		else if ( !b_create_dir )
+		{
+			std::cout << "Forward projection not calculated" << std::endl;
+		}
+		else if ( b_create_dir && file_exist(objfilename) && objfilesize & file_size(objfilename.c_str()) )
+		{
+			this->m_forward_projection();
+			this->a1_WriteForwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+			//std::cout << "Do forward projection" << std::endl;
+		}
+		else
+		{
+			std::cout << "Unknown error, good luck finding it" << std::endl;
+		}
 	}
 	else
 	{
-		std::cout << "Unknown error, good luck finding it" << std::endl;
+		std::cout << "Error, so did nothing" << std::endl;
 	}
+
 }
 
 void siddon_recon::a1_backward_projection(std::string configurationfilefolder, std::string configurationfilename, bool write_files_per_angle)
 {
-	this->m1_recon_initiate(configurationfilefolder, configurationfilename);
-	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
-
-	if (file_check)
+	bool startup_check = this->m1_recon_initiate(configurationfilefolder, configurationfilename);
+	if (startup_check)
 	{
-		this->m_backward_projection(write_files_per_angle);
-		std::cout << "do m_backward_projection()" << std::endl;
-		this->a1_WriteBackwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+
+		if (file_check)
+		{
+			this->m_backward_projection(write_files_per_angle);
+			std::cout << "do m_backward_projection()" << std::endl;
+			this->a1_WriteBackwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		}
+	}
+	else
+	{ 
+		std::cout << "Error, so did nothing" << std::endl;
 	}
 
 }
@@ -310,15 +348,22 @@ void siddon_recon::m_recon_initiate(std::string configurationfilename)
 
 }
 
-void siddon_recon::m1_recon_initiate(std::string configurationfilename)
+bool siddon_recon::m1_recon_initiate(std::string configurationfilename)
 {
 	if (file_exist(configurationfilename))
 	{
 		this->m_recon_initiate(configurationfilename);
+		this->p_initiate_check = true;
+		return true;
+	}
+	else
+	{
+		this->p_initiate_check = false;
+		return false;
 	}
 }
 
-void siddon_recon::m1_recon_initiate(std::string folder, std::string configurationfilename)
+bool siddon_recon::m1_recon_initiate(std::string folder, std::string configurationfilename)
 {
 
 	correct_folder_path(folder);
@@ -327,6 +372,13 @@ void siddon_recon::m1_recon_initiate(std::string folder, std::string configurati
 	if (file_exist(folder))
 	{
 		this->m_recon_initiate(folder);
+		this->p_initiate_check = true;
+		return true;
+	}
+	else
+	{
+		this->p_initiate_check = false;
+		return false;
 	}
 }
 
@@ -452,11 +504,17 @@ void siddon_recon::m_backward_projection(bool write_files_per_angle)
 		float angle_degree = (float)n * this->m_scanparam.DeltaAng;
 		this->m_siddon_var.a_calc_initial_limits(angle_degree, this->m_blocks_image, this->m_threads_image);
 
+		//load the projection images to host memory
 		readfloat(&this->m_image[0], this->b_N_image_pixels*sizeof(float), 
-			create_filename( this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, n, this->m_filepath.ProjFileSuffix) );
-		CUDA_SAFE_CALL( cudaMemcpy( this->md_image, &this->m_image[0], this->b_N_image_pixels*sizeof(float), cudaMemcpyHostToDevice));
-		this->a2_bp_per_angle(this->md_image, this->m_siddon_var, this->m_blocks_image, this->m_threads_image, 
-			this->m_blocks_object, this->m_threads_object, this->m_blocks_atomic, this->m_threads_atomic);
+					create_filename( this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, n, this->m_filepath.ProjFileSuffix) );
+
+		//copy projection host memory to device memory
+		CUDA_SAFE_CALL( cudaMemcpy( this->md_g_data, &this->m_image[0], this->b_N_image_pixels*sizeof(float), cudaMemcpyHostToDevice));
+
+
+		this->a2_bp_per_angle(this->md_g_data, this->m_siddon_var, this->m_blocks_image, this->m_threads_image, 
+								this->m_blocks_object, this->m_threads_object, this->m_blocks_atomic, this->m_threads_atomic);
+
 		siddon_add_bp<<<this->m_blocks_object, this->m_threads_object>>>(this->md_f, this->a_bpdevicepointer());
 
 		if (write_files_per_angle)
@@ -496,81 +554,3 @@ siddon_recon::~siddon_recon()
 }
 
 #endif
-
-
-//void siddon_recon::a_MLEM(mlem_input_values &mlem_values)
-//{
-//
-//	//Cursor positions
-//	int c1x, c1y, c2x, c2y;
-//
-//	//calculate sensitivity first
-//	m_calc_sensitivity();
-//
-//	set_ones<<<this->m_blocks_object, this->m_threads_object>>>(this->md_f);
-//
-//	std::string recon_filename_root;
-//	recon_filename_root = "recon_" + mlem_values.filename_root;
-//	float angle_degrees;
-//
-//	std::cout << "====================================================================="<< std::endl;
-//	std::cout << "MLEM recon started..." << std::endl;
-//	std::cout << "MLEM loop = ";
-//	CursorGetXY(c1x, c1y);
-//	for (int iteration = 0; iteration < mlem_values.N_iterations; iteration++)
-//	{
-//		//============== nothing but display on prompt ==========================================================
-//		CursorGotoXY(c1x, c1y, "          ");
-//		CursorGotoXY(c1x, c1y);
-//		std::cout << iteration << std::endl;
-//		std::cout << "angle = ";
-//		CursorGetXY(c2x, c2y);
-//		//=======================================================================================================
-//
-//		
-//		CUDA_SAFE_CALL( cudaMemset(this->md_Ht_fscale, 0, this->N_object_voxels*sizeof(float) ) );
-//		for (int n = 0; n < mlem_values.total_projection_images; n++)
-//		{
-//			angle_degrees = (float)n* mlem_values.delta_angle_deg;
-//
-//			//load g
-//			readfloat(&this->m_image[0], this->N_image_pixels*sizeof(float), 
-//				create_filename(mlem_values.folder_root, mlem_values.filename_root, n, mlem_values.suffix));
-//			CUDA_SAFE_CALL( cudaMemcpy(this->md_g_data, &this->m_image[0], this->N_image_pixels*sizeof(float), cudaMemcpyHostToDevice) );
-//
-//			//siddon algorithm initial numbers that'll be used for both forward and backward projections per angle
-//			this->m_siddon_var.a_calc_initial_limits(angle_degrees, this->m_blocks_image, this->m_threads_image);
-//			//std::cout << "loopN = " << m_siddon_var.loopN << "\t angle = " << angle_degrees << std::endl; 
-//
-//			// Hf
-//			this->a2_fp_per_angle(this->md_f, this->m_siddon_var, this->m_blocks_image, this->m_threads_image);
-//
-//			// g/Hf
-//			divide1<float><<<this->m_blocks_image, this->m_threads_image>>>(this->md_g_data, this->a_Fdevicepointer());
-//
-//			// Ht (g/Hf)
-//			this->a2_bp_per_angle(this->md_g_data, this->m_siddon_var, this->m_blocks_image, this->m_threads_image, this->m_blocks_object, this->m_threads_object, this->m_blocks_atomic, this->m_threads_atomic);
-//			siddon_add_bp<<<this->m_blocks_object, this->m_threads_object>>>(this->md_Ht_fscale, this->a_bpdevicepointer() );
-//
-//
-//			//============== nothing but display on prompt ==========================================================
-//			CursorGotoXY(c2x, c2y, "          ");
-//			CursorGotoXY(c2x, c2y);
-//			std::cout << angle_degrees;
-//			//=======================================================================================================
-//		}
-//		multiply1<float><<<this->m_blocks_object, this->m_threads_object>>>(this->md_f, this->md_Ht_fscale);
-//		divide1<float><<<this->m_blocks_object, this->m_threads_object>>>(this->md_f, this->a_dsensitivity_pointer());
-//
-//		CUDA_SAFE_CALL( cudaMemcpy(&this->m_object[0], this->md_f, this->N_object_voxels*sizeof(float), cudaMemcpyDeviceToHost) );
-//
-//
-//		savefloat(&this->m_object[0], this->N_object_voxels*sizeof(float), 
-//			create_filename( mlem_values.folder_root, recon_filename_root, iteration, mlem_values.suffix) );
-//			
-//	}
-//
-//	std::cout << "\n";
-//	std::cout << "completed! \n" << std::endl;
-//
-//}

@@ -18,8 +18,8 @@ int main()
 	sdkStartTimer(&timer);
 	
 	//---------------- how to use siddon_recon class --------------------------------
-	//siddon_recon recon;
-	//recon.a1_forward_projection("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "MasterParameterFile.cfg");
+	siddon_recon recon;
+	recon.a1_forward_projection("C:\\Users\\Ryan-Helen\\Documents\\Visual Studio 2010\\Projects\\recon\\CT_Recon", "CTParameters_042414.h");
 	//recon.a0_recon_mlem("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon\\ball", "fp_ball64.cfg");
 	//recon.a1_backward_projection("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon\\ball", "fp_ball64.cfg", true);
 	//-------------------------------------------------------------------
