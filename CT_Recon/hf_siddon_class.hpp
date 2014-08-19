@@ -620,6 +620,21 @@ void WriteParameterFile::m_write_filepath(FilePaths filepath)
 	this->m_file << "BpFileNameRoot \t\t\t = " << filepath.sim_BpFileNameRoot << "\n";
 	this->m_file << "BpFileSuffix \t\t\t = " << filepath.sim_BpFileSuffix << "\n";
 	this->m_file << "\n\n";
+
+	//extra comments for clarification on the simulation section
+	this->m_file << "## The Forward and Backward simulation will also use ProjFileFolder, ProjFileNameRoot and ProjFileSuffix \n\n";
+	this->m_file << "## For forward projection, the object file is loaded using the names indicated in the simulation section. \n";
+	this->m_file << "## Once the projections are calculated, they will be saved as: \n";
+	this->m_file << "## ProjFileFolder + ProjFileNameRoot + projection loop increment + ProjFileSuffix \n\n";
+	this->m_file << "## For backward projection, the each projection image file is loaded according to: \n";
+	this->m_file << "## ProjFileFolder + ProjFileNameRoot + projection loop increment + ProjFileSuffix \n";
+	this->m_file << "## The backward projection files are saved according to BpFileNameRoot and BpFileSuffix, \n";
+	this->m_file << "## where if indicated, each bp file at each angle is save separately as: \n";
+	this->m_file << "## ProjFileFolder + BpFileNameRoot + projection loop increment + BpFileSuffix. \n";
+	this->m_file << "## The total bp for all angle is saved as:\n";
+	this->m_file << "## ProjFileFoler + BpFileNameRoot + BpFileSuffix. \n\n";
+	this->m_file << "## !!!NOTE!!!: ReconFile* does not effect simulations\n";
+
 }
 
 

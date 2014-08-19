@@ -19,7 +19,8 @@ int main()
 	
 	//----------------reconstruction part--------------------------------
 	siddon_recon recon;
-	//recon.a1_forward_projection("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "CTParameters_042414.h");
+	recon.a1_forward_projection("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "MasterParameterFile.cfg");
+
 	//recon.a0_recon_mlem("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon\\ball", "fp_ball64.cfg");
 	//recon.a1_backward_projection("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon\\ball", "fp_ball64.cfg", true);
 	//-------------------------------------------------------------------
