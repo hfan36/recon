@@ -24,7 +24,6 @@ int main()
 	//recon.a1_backward_projection("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "MasterParameterFile.cfg", true);
 	//-------------------------------------------------------------------
 	
-
 	sdkStopTimer(&timer);
 	totalTime = sdkGetTimerValue(&timer)*1e-3;
 	printf("calculation time = %f seconds \n", totalTime);
