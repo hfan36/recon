@@ -18,13 +18,13 @@ class siddon_recon : public forward, public backward, public WriteParameterFile
 {
 public:
 	//main public functions that does stuff
-	void a0_recon_mlem(std::string configurationfilename, std::string outputparameterfilename);
-	void a0_recon_mlem(std::string configurationfilename);
-	void a0_recon_mlem(std::string configurationfilefolder, std::string configruationfilename,
+	void a0_RECON_MLEM(std::string configurationfilename, std::string outputparameterfilename);
+	void a0_RECON_MLEM(std::string configurationfilename);
+	void a0_RECON_MLEM(std::string configurationfilefolder, std::string configruationfilename,
 						std::string outputparameterfilename);
 
-	void a1_forward_projection(std::string configurationfilefolder, std::string configurationfilename);
-	void a1_backward_projection(std::string configurationfilefolder, std::string configurationfilename, bool write_files_per_angle);
+	void a1_FORWARD_PROJECTION(std::string configurationfilefolder, std::string configurationfilename);
+	void a1_BACKWARD_PROJECTION(std::string configurationfilefolder, std::string configurationfilename, bool write_files_per_angle);
 
 	//public functions to retrieve stuff
 	float *a_pull_recon_pointer();
@@ -61,14 +61,15 @@ protected:
 	dim3 m_blocks_atomic, m_threads_atomic;
 	siddon_commons m_siddon_var;
 
-	bool m1_recon_initiate(std::string configurationfilename);
-	bool m1_recon_initiate(std::string folder, std::string configurationfilename);
 	void m_recon_initiate(std::string configurationfilename);
-
+	void m_correct_filepaths(FilePaths &filepaths);
+	inline bool m_check_files(std::string configurationfilename);
+	inline bool m_check_forward_projection(std::string configurationfilename);
+	inline bool m_check_backward_projection(std::string configurationfilename);
+	bool m_check_reconstruction(std::string configurationfilename);
 
 	void m_calc_sensitivity();
 	void m_calc_kernel_threads();
-	void m_correct_filepaths(FilePaths &filepaths);
 
 
 	void m_mlem_single_iteration(int c2x, int c2y);
@@ -76,140 +77,239 @@ protected:
 	void m_forward_projection();
 	void m_backward_projection(bool write_files_per_angle);
 
+
 private:
-	bool p_allocate_check;
-	bool p_bool_fp_dir;
-	bool p_initiate_check;
+	bool pb_allocate_check;
+	bool pb_initiate_check;
+	bool pb_sim_obj_file;
 
 	float *pd_sensitivity;
 };
 
 // main public functions
-void siddon_recon::a0_recon_mlem(std::string configurationfilefolder, std::string configurationfilename)
+void siddon_recon::a0_RECON_MLEM(std::string configurationfilefolder, std::string configurationfilename)
 {
-	bool check_startup = this->m1_recon_initiate(configurationfilefolder, configurationfilename);
-	if (check_startup)
-	{
-		bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+	correct_folder_path(configurationfilefolder);
+	std::string config_file = configurationfilefolder + configurationfilename;
 
-		if (file_check)
-		{
-			this->m_mlem_all_iterations();
-			this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
-		}
+	if (this->m_check_reconstruction(config_file))
+	{
+		this->m_recon_initiate(config_file);
+		this->m_mlem_all_iterations();
+		this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		std::cout << "Do reconstruction" << std::endl;
 	}
 	else
 	{
-		std::cout << "Error, so did nothing" << std::endl;
+		std::cout << "Encountered error, so did nothing" << std::endl;
 	}
+
 }
 
-void siddon_recon::a0_recon_mlem(std::string configurationfilename)
+void siddon_recon::a0_RECON_MLEM(std::string configurationfilename)
 {
-	bool check_startup = this->m1_recon_initiate(configurationfilename);
-	if (check_startup)
+	correct_folder_path(configurationfilename);
+	if (this->m_check_reconstruction(configurationfilename))
 	{
-		bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
-
-		if (file_check)
-		{
-			this->m_mlem_all_iterations();
-			this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
-		}
+		this->m_recon_initiate(configurationfilename);
+		this->m_mlem_all_iterations();
+		this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		std::cout << "Do reconstruction" << std::endl;
 	}
 	else
 	{
-		std::cout << "Error, so did nothing" << std::endl;
+		std::cout << "Encountered error, so did nothing" << std::endl;
 	}
 }
 
-void siddon_recon::a0_recon_mlem(std::string configurationfilefolder, std::string configurationfilename, std::string outputparameterfilename)
+void siddon_recon::a0_RECON_MLEM(std::string configurationfilefolder, std::string configurationfilename, std::string outputparameterfilename)
 {
-	bool check_startup = this->m1_recon_initiate(configurationfilefolder, configurationfilename);
-	if (check_startup)
+	correct_folder_path(configurationfilefolder);
+	std::string config_file = configurationfilefolder + configurationfilename;
+
+	if (this->m_check_reconstruction(config_file))
 	{
-		bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+		this->m_recon_initiate(config_file);
+		this->m_mlem_all_iterations();
 		fix_configfile_suffix(outputparameterfilename);
-
-		if (file_check)
-		{
-			this->m_mlem_all_iterations();
-			this->a1_WriteReconParameters(outputparameterfilename, this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
-		}
+		this->a1_WriteReconParameters(outputparameterfilename, this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		std::cout << "Do reconstruction" << std::endl;
 	}
 	else
 	{
-		std::cout << "Error, so did nothing" << std::endl;
-	}
-}
-
-void siddon_recon::a1_forward_projection(std::string configurationfilefolder, std::string configurationfilename)
-{
-
-	bool startup_check = this->m1_recon_initiate(configurationfilefolder, configurationfilename);
-	
-	if (startup_check)
-	{
-		std::string objfilename = this->m_filepath.sim_ObjFileFolder + this->m_filepath.sim_ObjFileName;
-		std::ifstream::pos_type objfilesize = this->m_siddon_var.N_object_voxels*sizeof(float);
-	
-		bool b_create_dir = create_directory(this->m_filepath.ProjFileFolder.c_str());
-
-		if ( !file_exist(objfilename) )
-		{
-			std::cout << "object file does not exist!!" << std::endl;
-			std::cout << "The loaded object filename: " << objfilename << std::endl;
-		}
-		else if ( objfilesize != file_size( objfilename.c_str() ) )
-		{
-			std::cout << "object file size does not match input configuration file!" << std::endl;
-			std::cout << "file size = " << file_size( objfilename.c_str() ) << "bytes" << std::endl;
-			std::cout << "configuration file indicates that it should be = " << objfilesize << "bytes" << std::endl;
-		}
-		else if ( !b_create_dir )
-		{
-			std::cout << "Forward projection not calculated" << std::endl;
-		}
-		else if ( b_create_dir && file_exist(objfilename) && objfilesize & file_size(objfilename.c_str()) )
-		{
-			this->m_forward_projection();
-			this->a1_WriteForwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
-			//std::cout << "Do forward projection" << std::endl;
-		}
-		else
-		{
-			std::cout << "Unknown error, good luck finding it" << std::endl;
-		}
-	}
-	else
-	{
-		std::cout << "Error, so did nothing" << std::endl;
+		std::cout << "Encountered error, so did nothing" << std::endl;
 	}
 
 }
 
-void siddon_recon::a1_backward_projection(std::string configurationfilefolder, std::string configurationfilename, bool write_files_per_angle)
+void siddon_recon::a1_FORWARD_PROJECTION(std::string configurationfilefolder, std::string configurationfilename)
 {
-	bool startup_check = this->m1_recon_initiate(configurationfilefolder, configurationfilename);
-	if (startup_check)
-	{
-		bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+	correct_folder_path(configurationfilefolder);
+	std::string config_name = configurationfilefolder + configurationfilename;
 
-		if (file_check)
-		{
-			this->m_backward_projection(write_files_per_angle);
-			std::cout << "do m_backward_projection()" << std::endl;
-			this->a1_WriteBackwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
-		}
+	if (this->m_check_forward_projection(config_name))
+	{
+		this->m_recon_initiate(config_name);
+		this->m_forward_projection();
+		this->a1_WriteForwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		std::cout << "Do forward projection" << std::endl;
+	}
+	else
+	{
+		std::cout << "Encountered error, so did nothing" << std::endl;
+	}
+
+}
+
+void siddon_recon::a1_BACKWARD_PROJECTION(std::string configurationfilefolder, std::string configurationfilename, bool write_files_per_angle)
+{
+	correct_folder_path(configurationfilefolder);
+	std::string config_file = configurationfilefolder + configurationfilename;
+
+	if ( this->m_check_backward_projection(config_file) )
+	{
+		this->m_recon_initiate(config_file);
+		this->m_backward_projection(write_files_per_angle);
+		this->a1_WriteBackwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		std::cout << "do m_backward_projection()" << std::endl;
 	}
 	else
 	{ 
-		std::cout << "Error, so did nothing" << std::endl;
+		std::cout << "Encountered error, so did nothing" << std::endl;
 	}
 
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+inline bool siddon_recon::m_check_files(std::string configurationfilename)
+{
+
+	bool b_config_file = file_exist(configurationfilename);
+	if (b_config_file)
+	{
+		//load values from configuration file
+		this->m_params.LoadFromConfigFile(configurationfilename);
+		this->m_det.LoadFromConfigFile(configurationfilename);
+		this->m_vox.LoadFromConfigFile(configurationfilename);
+		this->m_scanparam.LoadFromConfigFile(configurationfilename);
+		this->m_filepath.LoadFromconfigFile(configurationfilename);
+		this->m_correct_filepaths(this->m_filepath);
+
+		//initiate and allocate functions for common siddon variables
+		this->m_siddon_var.a1_initiate(this->m_params, this->m_det, this->m_vox);
+		this->m_siddon_var.a2_allocate();
+		this->b_N_image_pixels = this->m_siddon_var.N_image_pixels;
+		this->b_N_object_voxels = this->m_siddon_var.N_object_voxels;
+		
+		std::string sim_obj_filename = this->m_filepath.sim_ObjFileFolder + this->m_filepath.sim_ObjFileName;
+		this->pb_sim_obj_file = file_exist(sim_obj_filename);
+		return true;
+	}
+	else
+	{
+		std::cout << "Error: Nothing was done" << std::endl;
+		return false;
+	}
+
+}
+
+inline bool siddon_recon::m_check_forward_projection(std::string configurationfilename)
+{
+	if (this->m_check_files(configurationfilename) )
+	{
+		std::string sim_obj_filename = this->m_filepath.sim_ObjFileFolder + this->m_filepath.sim_ObjFileName;
+		std::ifstream::pos_type objfilesize = this->b_N_object_voxels*sizeof(float);
+		bool b_create_dir = create_directory(this->m_filepath.ProjFileFolder.c_str());
+
+		if ( pb_sim_obj_file == false )
+		{
+			std::cout << "Did NOT load object volume from: " << sim_obj_filename << std::endl;
+			return false;
+		}
+		else if ( objfilesize != file_size( sim_obj_filename.c_str() ) )
+		{
+			std::cout << "object file size does not match input configuration file!" << std::endl;
+			std::cout << "file size = " << file_size( sim_obj_filename.c_str() ) << "bytes" << std::endl;
+			std::cout << "configuration file indicates that it should be = " << objfilesize << "bytes" << std::endl;
+			return false;
+		}
+		
+		else if ( !b_create_dir )
+		{			
+			std::cout << "New directory was not created" << std::endl;
+			std::cout << "Forward projection not calculated" << std::endl;
+			return false;
+		}
+		else if ( b_create_dir && pb_sim_obj_file && objfilesize & file_size( sim_obj_filename.c_str() ) )
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+}
+
+inline bool siddon_recon::m_check_backward_projection(std::string configurationfilename)
+{
+	if (this->m_check_files(configurationfilename))
+	{
+		//check_projection_files makes sure all projection image files exists, and its size are valid
+		bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+		if ( file_check )
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+
+	}
+	else
+	{
+		return false;
+	}
+
+}
+
+bool siddon_recon::m_check_reconstruction(std::string configurationfilename)
+{
+	if (this->m_check_files(configurationfilename) )
+	{
+		bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+		if (file_check)
+		{
+			return true;
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+}
 
 
 float *siddon_recon::a_pull_recon_pointer()
@@ -314,22 +414,6 @@ void siddon_recon::m_calc_sensitivity()
 
 void siddon_recon::m_recon_initiate(std::string configurationfilename)
 {
-	//load values from configuration file
-	this->m_params.LoadFromConfigFile(configurationfilename);
-	this->m_det.LoadFromConfigFile(configurationfilename);
-	this->m_vox.LoadFromConfigFile(configurationfilename);
-	this->m_scanparam.LoadFromConfigFile(configurationfilename);
-	this->m_filepath.LoadFromconfigFile(configurationfilename);
-	m_correct_filepaths(this->m_filepath);
-
-	this->p_bool_fp_dir = directory_exist(this->m_filepath.ProjFileFolder);
-
-	//initiate and allocate functions for common siddon variables
-	this->m_siddon_var.a1_initiate(this->m_params, this->m_det, this->m_vox);
-	this->m_siddon_var.a2_allocate();
-	this->b_N_image_pixels = this->m_siddon_var.N_image_pixels;
-	this->b_N_object_voxels = this->m_siddon_var.N_object_voxels;
-
 	//initiate and allocate functions to do forward and backward projection
 	this->a1_Binitiate(this->b_N_object_voxels, this->b_N_image_pixels);
 	this->a1_Finitiate(this-> b_N_image_pixels);
@@ -344,42 +428,8 @@ void siddon_recon::m_recon_initiate(std::string configurationfilename)
 
 	this->m_calc_kernel_threads();
 	this->a_pull_kernel_threads();
-	p_allocate_check = true;
+	this->pb_allocate_check = true;
 
-}
-
-bool siddon_recon::m1_recon_initiate(std::string configurationfilename)
-{
-	if (file_exist(configurationfilename))
-	{
-		this->m_recon_initiate(configurationfilename);
-		this->p_initiate_check = true;
-		return true;
-	}
-	else
-	{
-		this->p_initiate_check = false;
-		return false;
-	}
-}
-
-bool siddon_recon::m1_recon_initiate(std::string folder, std::string configurationfilename)
-{
-
-	correct_folder_path(folder);
-	folder.append(configurationfilename);
-	
-	if (file_exist(folder))
-	{
-		this->m_recon_initiate(folder);
-		this->p_initiate_check = true;
-		return true;
-	}
-	else
-	{
-		this->p_initiate_check = false;
-		return false;
-	}
 }
 
 void siddon_recon::m_mlem_single_iteration(int c2x, int c2y)
@@ -541,7 +591,7 @@ void siddon_recon::m_backward_projection(bool write_files_per_angle)
 
 siddon_recon::~siddon_recon()
 {
-	if (p_allocate_check)
+	if (pb_allocate_check)
 	{
 		m_siddon_var.a3_deallocate();
 		this->m_image.clear();
