@@ -421,15 +421,20 @@ class WriteParameterFile
 {
 
 public:
-	void a1_WriteReconParameters(	std::string parameterfilename, CalibrationParam params, Detector det, 
-									VoxVolParam vox, ScanParameters scanparam, 
-									FilePaths filepath);
+	void a1_WriteReconParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
+										VoxVolParam vox, ScanParameters scanparam, 
+										FilePaths filepath);
 	void a1_WriteReconParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
-	void a1_WriteForwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
+	
 	void a1_WriteForwardParameters(	std::string parameterfilename, CalibrationParam params, Detector det, 
-									VoxVolParam vox, ScanParameters scanparam, 
-									FilePaths filepath);
+										VoxVolParam vox, ScanParameters scanparam, 
+										FilePaths filepath);
+	void a1_WriteForwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
 
+	void a1_WriteBackwardParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
+										VoxVolParam vox, ScanParameters scanparam, 
+										FilePaths filepath);
+	void a1_WriteBackwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
 
 	~WriteParameterFile();
 
@@ -507,6 +512,39 @@ void WriteParameterFile::a1_WriteForwardParameters(CalibrationParam params, Dete
 	std::cout << "Parameter file written to: " << parameterfilename << std::endl;
 }
 
+void WriteParameterFile::a1_WriteBackwardParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
+											VoxVolParam vox, ScanParameters scanparam, 
+											FilePaths filepath)
+{
+	this->m_file.precision(4);
+	this->m_file.setf( std::ios::fixed, std::ios::floatfield);
+	this->m_file.open( create_filename(filepath.ProjFileFolder, parameterfilename) );
+	this->m_write_calparam(params);
+	this->m_write_det(det);
+	this->m_write_vox(vox);
+	this->m_write_scanparam(scanparam);
+	this->m_write_filepath(filepath);
+	this->m_file.close();
+	std::cout << "Parameter file written to: " << parameterfilename << std::endl;
+}
+
+void WriteParameterFile::a1_WriteBackwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
+{
+	std::string parameterfilename = filepath.sim_BpFileNameRoot+".cfg";
+
+	this->m_file.precision(4);
+	this->m_file.setf( std::ios::fixed, std::ios::floatfield);
+	this->m_file.open( create_filename(filepath.ProjFileFolder, parameterfilename) );
+	this->m_write_calparam(params);
+	this->m_write_det(det);
+	this->m_write_vox(vox);
+	this->m_write_scanparam(scanparam);
+	this->m_write_filepath(filepath);
+	this->m_file.close();
+	std::cout << "Parameter file written to: " << parameterfilename << std::endl;
+}
+
+
 void WriteParameterFile::m_write_calparam(CalibrationParam params)
 {
 	this->m_file << "################################ \n";
@@ -579,6 +617,8 @@ void WriteParameterFile::m_write_filepath(FilePaths filepath)
 	this->m_file << "########################################################### \n\n";
 	this->m_file << "ObjFileFolder \t\t\t = " << filepath.sim_ObjFileFolder << "\n";
 	this->m_file << "ObjFileName \t\t\t = " << filepath.sim_ObjFileName << "\n";
+	this->m_file << "BpFileNameRoot \t\t\t = " << filepath.sim_BpFileNameRoot << "\n";
+	this->m_file << "BpFileSuffix \t\t\t = " << filepath.sim_BpFileSuffix << "\n";
 	this->m_file << "\n\n";
 }
 

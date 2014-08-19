@@ -24,7 +24,8 @@ public:
 						std::string outputparameterfilename);
 
 	void a1_forward_projection(std::string configurationfilefolder, std::string configurationfilename);
-	
+	void a1_backward_projection(std::string configurationfilefolder, std::string configurationfilename, bool write_files_per_angle);
+
 	//public functions to retrieve stuff
 	float *a_pull_recon_pointer();
 	float *a_dsensitivity_pointer();
@@ -73,6 +74,7 @@ protected:
 	void m_mlem_single_iteration(int c2x, int c2y);
 	void m_mlem_all_iterations();
 	void m_forward_projection();
+	void m_backward_projection(bool write_files_per_angle);
 
 private:
 	bool p_allocate_check;
@@ -154,6 +156,22 @@ void siddon_recon::a1_forward_projection(std::string configurationfilefolder, st
 		std::cout << "Unknown error, good luck finding it" << std::endl;
 	}
 }
+
+void siddon_recon::a1_backward_projection(std::string configurationfilefolder, std::string configurationfilename, bool write_files_per_angle)
+{
+	this->m1_recon_initiate(configurationfilefolder, configurationfilename);
+	bool file_check = check_projection_files(this->m_scanparam.NumProj, this->m_det, this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, this->m_filepath.ProjFileSuffix); 
+
+	if (file_check)
+	{
+		this->m_backward_projection(write_files_per_angle);
+		std::cout << "do m_backward_projection()" << std::endl;
+		this->a1_WriteBackwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+	}
+
+}
+
+
 
 
 float *siddon_recon::a_pull_recon_pointer()
@@ -419,6 +437,48 @@ void siddon_recon::m_forward_projection()
 	std::cout << "================================="<< std::endl;
 	std::cout << "\n" <<std::endl;
 
+}
+
+void siddon_recon::m_backward_projection(bool write_files_per_angle)
+{
+	int x, y;
+	std::cout << "================================="<< std::endl;
+	std::cout << "Backward Projection started" << std::endl;
+	std::cout << "Backprojection angle (degrees) = \t";
+	CursorGetXY(x, y);
+
+	for (unsigned int n = 0; n < this->m_scanparam.NumProj; n++)
+	{
+		float angle_degree = (float)n * this->m_scanparam.DeltaAng;
+		this->m_siddon_var.a_calc_initial_limits(angle_degree, this->m_blocks_image, this->m_threads_image);
+
+		readfloat(&this->m_image[0], this->b_N_image_pixels*sizeof(float), 
+			create_filename( this->m_filepath.ProjFileFolder, this->m_filepath.ProjFileNameRoot, n, this->m_filepath.ProjFileSuffix) );
+		CUDA_SAFE_CALL( cudaMemcpy( this->md_image, &this->m_image[0], this->b_N_image_pixels*sizeof(float), cudaMemcpyHostToDevice));
+		this->a2_bp_per_angle(this->md_image, this->m_siddon_var, this->m_blocks_image, this->m_threads_image, 
+			this->m_blocks_object, this->m_threads_object, this->m_blocks_atomic, this->m_threads_atomic);
+		siddon_add_bp<<<this->m_blocks_object, this->m_threads_object>>>(this->md_f, this->a_bpdevicepointer());
+
+		if (write_files_per_angle)
+		{
+			CUDA_SAFE_CALL( cudaMemcpy(&this->m_object[0], this->a_bpdevicepointer(), this->b_N_object_voxels*sizeof(float), cudaMemcpyDeviceToHost) );
+			savefloat( &this->m_object[0], this->b_N_object_voxels*sizeof(float), 
+				create_filename(this->m_filepath.ProjFileFolder, this->m_filepath.sim_BpFileNameRoot, n, this->m_filepath.sim_BpFileSuffix) );
+		}
+
+		//for display to prompt
+		CursorGotoXY(x, y, "           ");
+		CursorGotoXY(x, y);
+		std::cout << angle_degree << std::endl;
+	}
+	CUDA_SAFE_CALL( cudaMemcpy(&this->m_object[0], this->md_f, this->b_N_object_voxels*sizeof(float), cudaMemcpyDeviceToHost) );
+	std::string filename = this->m_filepath.sim_BpFileNameRoot + this->m_filepath.sim_BpFileSuffix;
+	savefloat( &this->m_object[0], this->b_N_object_voxels*sizeof(float), 
+		create_filename(this->m_filepath.ProjFileFolder, filename) );
+
+	std::cout << "completed!" << std::endl;
+	std::cout << "================================="<< std::endl;
+	std::cout << "\n" <<std::endl;
 }
 
 siddon_recon::~siddon_recon()
