@@ -1,0 +1,83 @@
+################################ 
+#### Calibration Parameters #### 
+################################ 
+
+R		 = 1105.7000		# millimeters, x-ray source to detector distance (float) 
+Rf 		 = 907.4500			# millimeters, x-ray source to rotation axis (float) 
+Ry 		 = 1105.7000		# millimeters, R + dy
+Dx 		 = 0.0000			# millimeters, Detector offset in x direction (float)
+Dz 		 = 0.0000			# millimeters, Detector offset in z direction (float)
+xangle 	 = 0.0000			# radians, theta, Detector misalignment angle about x-axis (float)
+yangle 	 = 0.0000			# radians, eta, Detector misalignment angle about y-axis (float)
+zangle 	 = 0.0000			# radians, phi, Detector misalignment angle about z-axis (float)
+M 		 = 13.1024			# magnification of the lens (float)
+
+
+############################### 
+##### Detector Parameters ##### 
+############################### 
+
+TAxPixels 		 = 512			# 2160 Number of Transaxial pixels (unsigned int)
+AxPixels 		 = 1024			# 2560 Number of Axial pixels (unsigned int)
+TAxPixDim 		 = 0.0065		# millimeters, Dimension of pixel in Transaxial direction (float)
+AxPixDim 		 = 0.0065		# millimeters, Dimension of pixel in Axial direction (float)
+
+
+############################### 
+### Voxel Volume Parameters ### 
+############################### 
+
+Xdim 		 = 64			# Number of voxels in x direction (unsigned int)
+Ydim 		 = 64			# Number of voxels in y direction (unsigned int)
+Zdim 		 = 64			# Number of voxels in z direction (unsigned int)
+XVoxSize 	 = 0.2000		# millimeters, size of voxel element in x direction (float)
+YVoxSize 	 = 0.2000		# millimeters, size of voxel element in y direction (float)
+ZVoxSize 	 = 0.2000		# millimeters, size of voxel element in z direction (float)
+
+
+############################### 
+####### Scan Parameters ####### 
+############################### 
+
+N_iteration 	 = 2			# Number of MLEM iterations (unsigned int);
+NumProj 		 = 180			# Number of projections in scan (unsigned int)
+DeltaAng 		 = 2.0000		# degrees, Angular spacing between projections (float)
+
+
+############################### 
+######### File Paths ########## 
+############################### 
+
+ProjFileFolder 			 = H:/Visual Studio 2010/CT_Recon/CT_Recon/simulation/
+ProjFileNameRoot 		 = fp_phantom_voxelvolume64
+ProjFileSuffix 			 = .bin
+ReconFileFolder 		 = H:/Visual Studio 2010/CT_Recon/CT_Recon/simulation/
+ReconFileNameRoot 		 = recon_fp_phantom_voxelvolume64
+ReconFileSuffix 		 = .bin
+
+
+########################################################### 
+######### File Paths for simulation purpose only ########## 
+########################################################### 
+
+ObjFileFolder 			 = H:\Visual Studio 2010\CTSolution\Siddon
+ObjFileName 			 = phantom_voxelvolume.bin
+BpFileNameRoot 			 = bp_ball64
+BpFileSuffix 			 = .bin
+
+
+## The Forward and Backward simulation will also use ProjFileFolder, ProjFileNameRoot and ProjFileSuffix 
+
+## For forward projection, the object file is loaded using the names indicated in the simulation section. 
+## Once the projections are calculated, they will be saved as: 
+## ProjFileFolder + ProjFileNameRoot + projection loop increment + ProjFileSuffix 
+
+## For backward projection, the each projection image file is loaded according to: 
+## ProjFileFolder + ProjFileNameRoot + projection loop increment + ProjFileSuffix 
+## The backward projection files are saved according to BpFileNameRoot and BpFileSuffix, 
+## where if indicated, each bp file at each angle is save separately as: 
+## ProjFileFolder + BpFileNameRoot + projection loop increment + BpFileSuffix. 
+## The total bp for all angle is saved as:
+## ProjFileFoler + BpFileNameRoot + BpFileSuffix. 
+
+## !!!NOTE!!!: ReconFile* does not effect simulations

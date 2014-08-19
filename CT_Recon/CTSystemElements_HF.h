@@ -130,6 +130,8 @@ struct FilePaths
 	std::string ReconFileSuffix;
 	std::string sim_ObjFileFolder;
 	std::string sim_ObjFileName;
+	std::string sim_BpFileNameRoot;
+	std::string sim_BpFileSuffix;
 
 	int LoadFromconfigFile(std::string FilePath)
 	{
@@ -140,9 +142,10 @@ struct FilePaths
 		this->ReconFileFolder	= configfile.read<std::string>("ReconFileFolder");
 		this->ReconFileNameRoot	= configfile.read<std::string>("ReconFileNameRoot");
 		this->ReconFileSuffix	= configfile.read<std::string>("ReconFileSuffix");
-		this->sim_ObjFileFolder		= configfile.read<std::string>("ObjFileFolder");
-		this->sim_ObjFileName		= configfile.read<std::string>("ObjFileName");
-
+		this->sim_ObjFileFolder	= configfile.read<std::string>("ObjFileFolder");
+		this->sim_ObjFileName	= configfile.read<std::string>("ObjFileName");
+		this->sim_BpFileNameRoot= configfile.read<std::string>("BpFileNameRoot");
+		this->sim_BpFileSuffix	= configfile.read<std::string>("BpFileSuffix");
 		return 0;
 	}
 };
