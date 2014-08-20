@@ -63,7 +63,7 @@ ProjFileFolder 		= H:\CT data\051314\cleaned_data					# Folder path
 ProjFileNameRoot 	= C1024_2_clean_phantom_60kV_400uA_10sec			# Projection File Root name
 ProjFileSuffix 		= .ct												# Projection File suffix
 ReconFileFolder 	= 													# Folder path for the reconstructed file
-ReconFileNameRoot 	= recon_phantom512_s10										# Reconstructed file root name
+ReconFileNameRoot 	= recon_phantom512_s10								# Reconstructed file root name
 ReconFileSuffix 	= .bin												# Reconstructed file suffix
 
 #####################################################
