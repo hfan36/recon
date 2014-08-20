@@ -27,12 +27,12 @@ AxPixDim	= 0.0065  	# 0.0065 , 0.013 millimeters, Dimension of pixel in Axial di
 ## Voxel Volume Parameters ##
 #############################
 
-Xdim		= 64		# Number of voxels in x direction (unsigned int)
-Ydim		= 64		# Number of voxels in y direction (unsigned int)
-Zdim		= 64		# Number of voxels in z direction (unsigned int)
-XVoxSize	= 1.5789	# 1.5789  millimeters, size of voxel element in x direction (float)
-YVoxSize	= 1.5789	# 1.5789  millimeters, size of voxel element in y direction (float)
-ZVoxSize	= 1.5789	# 1.5789  millimeters, size of voxel element in z direction (float)
+Xdim		= 512		# Number of voxels in x direction (unsigned int)
+Ydim		= 512		# Number of voxels in y direction (unsigned int)
+Zdim		= 10		# Number of voxels in z direction (unsigned int)
+XVoxSize	= 0.25			# 1.5789  millimeters, size of voxel element in x direction (float)
+YVoxSize	= 0.25			# 1.5789  millimeters, size of voxel element in y direction (float)
+ZVoxSize	= 0.25			# 1.5789  millimeters, size of voxel element in z direction (float)
 
 ##############################################
 ##### Object Parameters (not really used)#####
@@ -50,7 +50,7 @@ ObjZangle = 0.0		# degrees, angular orientation of object about z-axis (float)
 ##### Scan Parameters #######
 #############################
 
-N_iteration = 2 	# Number of MLEM iterations (unsigned int);
+N_iteration = 20 	# Number of MLEM iterations (unsigned int);
 NumProj		= 180  	# Number of projections in scan (unsigned int)
 DeltaAng	= 2		# degrees, Angular spacing between projections (float)
 
@@ -63,7 +63,7 @@ ProjFileFolder 		= H:\CT data\051314\cleaned_data					# Folder path
 ProjFileNameRoot 	= C1024_2_clean_phantom_60kV_400uA_10sec			# Projection File Root name
 ProjFileSuffix 		= .ct												# Projection File suffix
 ReconFileFolder 	= 													# Folder path for the reconstructed file
-ReconFileNameRoot 	= recon_C1024_2_clean_phantom_60kV_400uA_10sec		# Reconstructed file root name
+ReconFileNameRoot 	= recon_phantom512_s10										# Reconstructed file root name
 ReconFileSuffix 	= .bin												# Reconstructed file suffix
 
 #####################################################
