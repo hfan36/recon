@@ -251,6 +251,8 @@ inline bool check_projection_files(unsigned int total_projection_images, Detecto
 		if ( image_size != file_size(filename.c_str()) )
 		{
 			std::cout << "error: file size does not match with parameter file!" << std::endl;
+			std::cout << "file sizes are = " << file_size(filename.c_str()) << " bytes" << std::endl;
+			std::cout << "parameter file indicates that it should be = " << image_size << " bytes" << std::endl;
 			return false;
 		}
 	}
