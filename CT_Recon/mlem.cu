@@ -25,7 +25,7 @@ int main()
 	siddon_recon recon;
 	//recon.a1_FORWARD_PROJECTION("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "CTParameters_042414.h");
 	recon.a0_RECON_MLEM("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon\\", "CTParameters_042414.h");
-	//recon.a1_backward_projection("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "MasterParameterFile.cfg", true);
+	//recon.a1_BACKWARD_PROJECTION("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "MasterParameterFile.cfg", true);
 	//-------------------------------------------------------------------
 	
 	sdkStopTimer(&timer);
