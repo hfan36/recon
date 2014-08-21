@@ -408,7 +408,8 @@ void siddon_recon::m_calc_sensitivity()
 		CursorGotoXY(cursorX, cursorY);
 		std::cout << angle_degree;
 	}
-	std::cout<< "\n sensitivity calculated! " << std::endl;
+	std::cout << "\n";
+	std::cout << "sensitivity calculated! " << std::endl;
 
 }
 

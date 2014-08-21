@@ -450,7 +450,7 @@ protected:
 
 void WriteParameterFile::a1_WriteReconParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
 {
-	std::string parameterfilename = filepath.ReconFileNameRoot+".cfg";
+	std::string parameterfilename = filepath.ReconFileNameRoot+".info";
 
 	this->m_file.precision(4);
 	this->m_file.setf( std::ios::fixed, std::ios::floatfield);
@@ -498,7 +498,7 @@ void WriteParameterFile::a1_WriteForwardParameters(std::string parameterfilename
 
 void WriteParameterFile::a1_WriteForwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
 {
-	std::string parameterfilename = filepath.ProjFileNameRoot+".cfg";
+	std::string parameterfilename = filepath.ProjFileNameRoot+".info";
 
 	this->m_file.precision(4);
 	this->m_file.setf( std::ios::fixed, std::ios::floatfield);
@@ -530,7 +530,7 @@ void WriteParameterFile::a1_WriteBackwardParameters(std::string parameterfilenam
 
 void WriteParameterFile::a1_WriteBackwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
 {
-	std::string parameterfilename = filepath.sim_BpFileNameRoot+".cfg";
+	std::string parameterfilename = filepath.sim_BpFileNameRoot+".info";
 
 	this->m_file.precision(4);
 	this->m_file.setf( std::ios::fixed, std::ios::floatfield);
