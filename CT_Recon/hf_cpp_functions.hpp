@@ -1,3 +1,5 @@
+//written by Helen Fan, some code might be taken from online, it's noted
+
 #ifndef HF_CPP_FUNCTIONS_HPP_
 #define HF_CPP_FUNCTIONS_HPP_
 
@@ -28,12 +30,14 @@ void CursorGotoXY(int x, int y, string text)
 	std::cout << text;
 }
 
+//got it online somewhere...
 void CursorGetXY(int &x, int &y)
 {
 	GetConsoleScreenBufferInfo(console, pcsbi);
 	x = csbi.dwCursorPosition.X;
 	y = csbi.dwCursorPosition.Y;
 }
+
 
 struct cursor_position
 {
@@ -102,6 +106,7 @@ void linspace<T>::operator()(T *larray, T initialValue, T endValue, int size)
 	}
 }
 
+
 float degree_to_rad(float degrees)
 {
 	float rad = degrees * 3.14f/180.0f;		
@@ -150,116 +155,6 @@ std::ifstream::pos_type file_size(const char* filename)
     in.seekg(0, std::ifstream::end);
     return in.tellg(); 
 }
-
-
-
-struct mlem_input_values
-{
-	unsigned int N_iterations;
-	unsigned int total_projection_images;
-	float delta_angle_deg;
-	std::string filename_root;
-	std::string suffix;
-	std::string folder_root;
-
-	void create(unsigned int N_iterations, unsigned int total_projection_images, float delta_angle_deg,
-				std::string folder_root, std::string filename_root, std::string suffix)
-	{
-		this->N_iterations = N_iterations;
-		this->total_projection_images = total_projection_images;
-		this->delta_angle_deg = delta_angle_deg;
-		this->filename_root = filename_root;
-		this->folder_root = folder_root;
-		this->suffix = suffix;
-	}
-};
-
-
-
-struct osem_input_values
-{
-	unsigned int N_iterations;
-	unsigned int N_subsets;
-	unsigned int total_projection_images;
-	std::string filename_root;
-	std::string folder_root;
-	std::string suffix;
-	
-	void create(unsigned int N_iterations, unsigned int N_subsets, unsigned int total_projection_images,
-				std::string filename_root, std::string suffix)
-	{
-		this->N_iterations = N_iterations;
-		this->N_subsets = N_subsets;
-		this->total_projection_images = total_projection_images;
-		this->filename_root = filename_root;
-		this->suffix = suffix;
-	}
-};
-
-
-struct recon_values
-{
-	unsigned int N_iterations;
-	unsigned int N_subsets;
-	CTangles subset_angles;
-
-	unsigned int total_projection_images;
-	std::string filename_root;
-	std::string suffix;
-	std::string folder_root;
-
-
-	void create(unsigned int N_iterations, unsigned int N_subsets, 
-				float subset_initial_angle_deg, float subset_delta_angle_deg,
-				unsigned int subset_N_projections, unsigned int total_projection_images, 
-				std::string filename_root, std::string suffix)
-	{
-		this->N_iterations = N_iterations;
-		this->N_subsets = N_subsets;
-		this->subset_angles.initial_angle = subset_initial_angle_deg;
-		this->subset_angles.delta_angle = subset_delta_angle_deg;
-		this->subset_angles.num_proj = subset_N_projections;
-
-		this->total_projection_images = total_projection_images;
-		this->filename_root = filename_root;
-		this->suffix = suffix;
-	}
-
-};
-
-struct osem_subset_inputs
-{
-	float subset_initial_angle_deg;
-	float subset_delta_angle_deg;
-	unsigned int subset_N_projections;
-	unsigned int subset_iterator;
-};
-
-inline bool check_projection_files(unsigned int total_projection_images, Detector det, std::string folder_root, std::string filename_root, std::string suffix)
-{
-	int image_size = det.NumAxPixels*det.NumTAxPixels*sizeof(float);
-	std::string filename;
-	for (unsigned int i = 0; i < total_projection_images; i++)
-	{
-		filename = create_filename(folder_root, filename_root, i, suffix);
-
-		if (!file_exist(filename))
-		{
-			std::cout << "error: file => " << filename << "does not exist!" << std::endl;
-			return false;
-		}
-		if ( image_size != file_size(filename.c_str()) )
-		{
-			std::cout << "error: file size does not match with parameter file!" << std::endl;
-			std::cout << "file sizes are = " << file_size(filename.c_str()) << " bytes" << std::endl;
-			std::cout << "parameter file indicates that it should be = " << image_size << " bytes" << std::endl;
-			return false;
-		}
-	}
-
-	return true;
-}
-
 
 void correct_folder_path(std::string &folderpath)
 {
@@ -348,6 +243,119 @@ std::string fix_configfile_suffix(std::string &filename)
 
 	return(filename);
 }
+
+inline bool check_projection_files(unsigned int total_projection_images, Detector det, std::string folder_root, std::string filename_root, std::string suffix)
+{
+	int image_size = det.NumAxPixels*det.NumTAxPixels*sizeof(float);
+	std::string filename;
+	for (unsigned int i = 0; i < total_projection_images; i++)
+	{
+		filename = create_filename(folder_root, filename_root, i, suffix);
+
+		if (!file_exist(filename))
+		{
+			std::cout << "error: file => " << filename << "does not exist!" << std::endl;
+			return false;
+		}
+		if ( image_size != file_size(filename.c_str()) )
+		{
+			std::cout << "error: file size does not match with parameter file!" << std::endl;
+			std::cout << "file sizes are = " << file_size(filename.c_str()) << " bytes" << std::endl;
+			std::cout << "parameter file indicates that it should be = " << image_size << " bytes" << std::endl;
+			return false;
+		}
+	}
+
+	return true;
+}
+
+
+
+//the stuff below are not really useful anymore, the class that requires these structs don't really work :(
+struct mlem_input_values
+{
+	unsigned int N_iterations;
+	unsigned int total_projection_images;
+	float delta_angle_deg;
+	std::string filename_root;
+	std::string suffix;
+	std::string folder_root;
+
+	void create(unsigned int N_iterations, unsigned int total_projection_images, float delta_angle_deg,
+				std::string folder_root, std::string filename_root, std::string suffix)
+	{
+		this->N_iterations = N_iterations;
+		this->total_projection_images = total_projection_images;
+		this->delta_angle_deg = delta_angle_deg;
+		this->filename_root = filename_root;
+		this->folder_root = folder_root;
+		this->suffix = suffix;
+	}
+};
+
+
+
+struct osem_input_values
+{
+	unsigned int N_iterations;
+	unsigned int N_subsets;
+	unsigned int total_projection_images;
+	std::string filename_root;
+	std::string folder_root;
+	std::string suffix;
+	
+	void create(unsigned int N_iterations, unsigned int N_subsets, unsigned int total_projection_images,
+				std::string filename_root, std::string suffix)
+	{
+		this->N_iterations = N_iterations;
+		this->N_subsets = N_subsets;
+		this->total_projection_images = total_projection_images;
+		this->filename_root = filename_root;
+		this->suffix = suffix;
+	}
+};
+
+
+struct recon_values
+{
+	unsigned int N_iterations;
+	unsigned int N_subsets;
+	CTangles subset_angles;
+
+	unsigned int total_projection_images;
+	std::string filename_root;
+	std::string suffix;
+	std::string folder_root;
+
+
+	void create(unsigned int N_iterations, unsigned int N_subsets, 
+				float subset_initial_angle_deg, float subset_delta_angle_deg,
+				unsigned int subset_N_projections, unsigned int total_projection_images, 
+				std::string filename_root, std::string suffix)
+	{
+		this->N_iterations = N_iterations;
+		this->N_subsets = N_subsets;
+		this->subset_angles.initial_angle = subset_initial_angle_deg;
+		this->subset_angles.delta_angle = subset_delta_angle_deg;
+		this->subset_angles.num_proj = subset_N_projections;
+
+		this->total_projection_images = total_projection_images;
+		this->filename_root = filename_root;
+		this->suffix = suffix;
+	}
+
+};
+
+struct osem_subset_inputs
+{
+	float subset_initial_angle_deg;
+	float subset_delta_angle_deg;
+	unsigned int subset_N_projections;
+	unsigned int subset_iterator;
+};
+
+
+
 
 bool check_recon_inputs(osem_subset_inputs &osem_subset, osem_input_values osem_inputs)
 {

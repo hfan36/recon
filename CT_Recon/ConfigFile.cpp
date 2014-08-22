@@ -1,5 +1,4 @@
 // ConfigFile.cpp
-
 #include "ConfigFile.h"
 
 using std::string;

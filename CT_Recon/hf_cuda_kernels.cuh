@@ -121,6 +121,8 @@ __global__ void add_total_distance_traveled(float *md_FPimage, CalibrationParam 
 
 //forward projection 2
 //alpha (angle in radians, is the rotation for CT)
+//don't bother, it works, but it's not complementary to the backward_projection function, when used together, doesn't
+//get great results after lots of iterations.
 __global__ void forward_projection(float *md_FPimage, CalibrationParam CalParam, Detector Det, ObjectParam ObjParam,
 									VoxVolParam voxparam, float *RM, float y0, float alpha_deg)
 {

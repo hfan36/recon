@@ -1,3 +1,5 @@
+//Written by Helen Fan
+
 #include <iostream>
 #include <iomanip>
 #include <string>

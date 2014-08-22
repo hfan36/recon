@@ -1,5 +1,5 @@
 #pragma once
-
+//Written by Helen Fan
 
 #ifndef HF_SIDDON_CLASS_HPP_
 #define HF_SIDDON_CLASS_HPP_

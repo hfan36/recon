@@ -1,3 +1,5 @@
+//Written by Helen Fan, probably not used in the end.
+
 #ifndef CTSYSTEM_HF_HPP_
 #define CTSYSTEM_HF_HPP_
 

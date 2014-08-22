@@ -1,3 +1,6 @@
+//Written by Helen Fan
+
+
 #pragma once
 #ifndef SIDDON_DEVICE_KERNELSMLEM_CUH
 #define SIDDON_DEVICE_KERNELSMLEM_CUH
