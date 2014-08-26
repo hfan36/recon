@@ -16,8 +16,6 @@
 //.info - generated using siddon_recon class, saves the information that was used to create files
 //.cfg - used as input for the siddon_recon class for recon/projection/backprojection
 
-void DisplayError(LPTSTR lpszFunction);
-
 int main()
 {
 	cudaProfilerStart();
