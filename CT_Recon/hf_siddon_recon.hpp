@@ -365,8 +365,8 @@ float *siddon_recon::a_dsensitivity_pointer()
 
 void siddon_recon::m_calc_kernel_threads()
 {
-	this->m_threads_image.x = 8;
-	this->m_threads_image.y = 8;
+	this->m_threads_image.x = 4;
+	this->m_threads_image.y = 4;
 	this->m_blocks_image.x = this->m_det.NumAxPixels/m_threads_image.x;
 	this->m_blocks_image.y = this->m_det.NumTAxPixels/m_threads_image.y;
 	

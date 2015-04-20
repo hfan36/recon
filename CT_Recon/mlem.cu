@@ -28,7 +28,7 @@ int main()
 	
 	//---------------- how to use siddon_recon class --------------------------------
 	siddon_recon recon;
-	//recon.a1_FORWARD_PROJECTION("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "CTParameters.h");
+	//recon.a1_FORWARD_PROJECTION("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "CTParameters.cfg");
 	recon.a0_RECON_MLEM("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon\\", "CTParameters.cfg");
 	//recon.a1_BACKWARD_PROJECTION("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "MasterParameterFile.cfg", true);
 	//-------------------------------------------------------------------
