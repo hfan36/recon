@@ -307,11 +307,12 @@ __device__ void calc_points12(float3 &p1, float3 &p2,
 							  int depth_iterate, int height_iterate, float angle_degree)
 {
 	float3 detector;
+	//The shift here added by AxShift and TAxShift are found by ucenter and venter in the contracting-grid
 	detector.x = pixel_iterate2(Det.NumAxPixels, Det.AxPixDimMm, CalParam.M, depth_iterate, Det.AxShift);
 	detector.y = CalParam.R - CalParam.Rf;
 	detector.z = pixel_iterate2(Det.NumTAxPixels, Det.TAxPixDimMm, CalParam.M, height_iterate, Det.TAxShift);
 
-	//shifted and rotated using calibrated parameters
+	//The detector is then shifted and rotated using calibrated parameters
 	detector.x = __fdividef(CalParam.R, (CalParam.Ry + RM[3]*detector.x + RM[5]*detector.z)) *(RM[0]*detector.x + RM[2]*detector.z + CalParam.Dx);
 	detector.z = __fdividef(CalParam.R, (CalParam.Ry + RM[3]*detector.x + RM[5]*detector.z)) *(RM[6]*detector.x + RM[8]*detector.z + CalParam.Dz);
 

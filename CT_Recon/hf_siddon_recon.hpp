@@ -48,6 +48,7 @@ protected:
 	Detector m_det;
 	VoxVolParam m_vox;
 	ScanParameters m_scanparam;
+	ObjectParam m_objparam;
 	FilePaths m_filepath;
 
 	LoadRawData <float> readfloat;
@@ -97,7 +98,7 @@ void siddon_recon::a0_RECON_MLEM(std::string configurationfilefolder, std::strin
 	{
 		this->m_recon_initiate(config_file);
 		this->m_mlem_all_iterations();
-		this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_objparam, this->m_scanparam, this->m_filepath);
 		std::cout << "Do reconstruction" << std::endl;
 	}
 	else
@@ -114,7 +115,7 @@ void siddon_recon::a0_RECON_MLEM(std::string configurationfilename)
 	{
 		this->m_recon_initiate(configurationfilename);
 		this->m_mlem_all_iterations();
-		this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		this->a1_WriteReconParameters(this->m_params, this->m_det, this->m_vox, this->m_objparam, this->m_scanparam, this->m_filepath);
 		std::cout << "Do reconstruction" << std::endl;
 	}
 	else
@@ -133,7 +134,7 @@ void siddon_recon::a0_RECON_MLEM(std::string configurationfilefolder, std::strin
 		this->m_recon_initiate(config_file);
 		this->m_mlem_all_iterations();
 		fix_configfile_suffix(outputparameterfilename);
-		this->a1_WriteReconParameters(outputparameterfilename, this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		this->a1_WriteReconParameters(outputparameterfilename, this->m_params, this->m_det, this->m_vox, this->m_objparam,this->m_scanparam, this->m_filepath);
 		std::cout << "Do reconstruction" << std::endl;
 	}
 	else
@@ -152,7 +153,7 @@ void siddon_recon::a1_FORWARD_PROJECTION(std::string configurationfilefolder, st
 	{
 		this->m_recon_initiate(config_name);
 		this->m_forward_projection();
-		this->a1_WriteForwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		this->a1_WriteForwardParameters(this->m_params, this->m_det, this->m_vox, this->m_objparam,this->m_scanparam, this->m_filepath);
 		std::cout << "Do forward projection" << std::endl;
 	}
 	else
@@ -171,7 +172,7 @@ void siddon_recon::a1_BACKWARD_PROJECTION(std::string configurationfilefolder, s
 	{
 		this->m_recon_initiate(config_file);
 		this->m_backward_projection(write_files_per_angle);
-		this->a1_WriteBackwardParameters(this->m_params, this->m_det, this->m_vox, this->m_scanparam, this->m_filepath);
+		this->a1_WriteBackwardParameters(this->m_params, this->m_det, this->m_vox, this->m_objparam, this->m_scanparam, this->m_filepath);
 		std::cout << "do m_backward_projection()" << std::endl;
 	}
 	else
@@ -180,16 +181,6 @@ void siddon_recon::a1_BACKWARD_PROJECTION(std::string configurationfilefolder, s
 	}
 
 }
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -204,11 +195,12 @@ inline bool siddon_recon::m_check_files(std::string configurationfilename)
 		this->m_det.LoadFromConfigFile(configurationfilename);
 		this->m_vox.LoadFromConfigFile(configurationfilename);
 		this->m_scanparam.LoadFromConfigFile(configurationfilename);
+		this->m_objparam.LoadFromConfigFile(configurationfilename);
 		this->m_filepath.LoadFromconfigFile(configurationfilename);
 		this->m_correct_filepaths(this->m_filepath);
 
 		//initiate and allocate functions for common siddon variables
-		this->m_siddon_var.a1_initiate(this->m_params, this->m_det, this->m_vox);
+		this->m_siddon_var.a1_initiate(this->m_params, this->m_det, this->m_vox, this->m_objparam);
 		this->m_siddon_var.a2_allocate();
 		this->b_N_image_pixels = this->m_siddon_var.N_image_pixels;
 		this->b_N_object_voxels = this->m_siddon_var.N_object_voxels;

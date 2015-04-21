@@ -40,7 +40,7 @@ struct siddon_commons
 	std::vector <unsigned int> delta_index;
 
 	int check;
-	void a1_initiate(CalibrationParam params, Detector det, VoxVolParam vox)
+	void a1_initiate(CalibrationParam params, Detector det, VoxVolParam vox, ObjectParam objparam)
 	{
 		Planes P_initial; //voxel volume initial plane position
 		Planes P_final; //voxel volume final plane position
@@ -48,9 +48,17 @@ struct siddon_commons
 		Planes XraySource; // position of the x-ray source
 		
 		//fill in the Planes
-		P_initial.fill( -(float)vox.Xdim/2.0f*(float)vox.XVoxSize, -(float)vox.Ydim/2.0f*(float)vox.YVoxSize, -(float)vox.Zdim/2.0f*(float)vox.ZVoxSize);
-		P_final.fill(    (float)vox.Xdim/2.0f*(float)vox.XVoxSize,  (float)vox.Ydim/2.0f*(float)vox.YVoxSize,  (float)vox.Zdim/2.0f*(float)vox.ZVoxSize);
-		P_delta.fill( vox.XVoxSize, vox.YVoxSize, vox.ZVoxSize );
+		//initial planes created by the object, with shift from objparam
+		P_initial.fill( -(float)vox.Xdim/2.0f*(float)vox.XVoxSize + objparam.ObjX, 
+						-(float)vox.Ydim/2.0f*(float)vox.YVoxSize + objparam.ObjY, 
+						-(float)vox.Zdim/2.0f*(float)vox.ZVoxSize + objparam.ObjZ);
+
+		//final planes created by the object, with shift from objparam
+		P_final.fill(   (float)vox.Xdim/2.0f*(float)vox.XVoxSize + objparam.ObjX,  
+						(float)vox.Ydim/2.0f*(float)vox.YVoxSize + objparam.ObjY,  
+						(float)vox.Zdim/2.0f*(float)vox.ZVoxSize + objparam.ObjZ);
+
+		P_delta.fill( vox.XVoxSize, vox.YVoxSize, vox.ZVoxSize ); //delta planes; i.e. spacing between the planes. objparam does not affect this
 		XraySource.fill(0.0f, (-params.Rf), 0.0f);
 		system.create(params, det, vox, P_initial, P_final, P_delta, XraySource);	
 		
@@ -422,19 +430,19 @@ class WriteParameterFile
 
 public:
 	void a1_WriteReconParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
-										VoxVolParam vox, ScanParameters scanparam, 
+										VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, 
 										FilePaths filepath);
-	void a1_WriteReconParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
+	void a1_WriteReconParameters(CalibrationParam params, Detector det, VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, FilePaths filepath);
 	
 	void a1_WriteForwardParameters(	std::string parameterfilename, CalibrationParam params, Detector det, 
-										VoxVolParam vox, ScanParameters scanparam, 
+										VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, 
 										FilePaths filepath);
-	void a1_WriteForwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
+	void a1_WriteForwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, FilePaths filepath);
 
 	void a1_WriteBackwardParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
-										VoxVolParam vox, ScanParameters scanparam, 
+										VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, 
 										FilePaths filepath);
-	void a1_WriteBackwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath);
+	void a1_WriteBackwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, FilePaths filepath);
 
 	~WriteParameterFile();
 
@@ -444,11 +452,12 @@ protected:
 	void m_write_det(Detector det);
 	void m_write_vox(VoxVolParam vox);
 	void m_write_scanparam(ScanParameters scanparam);
+	void m_write_objparam(ObjectParam objparam);
 	void m_write_filepath(FilePaths filepath);
 	std::ofstream m_file;
 };
 
-void WriteParameterFile::a1_WriteReconParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
+void WriteParameterFile::a1_WriteReconParameters(CalibrationParam params, Detector det, VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, FilePaths filepath)
 {
 	std::string parameterfilename = filepath.ReconFileNameRoot+".info";
 
@@ -458,6 +467,7 @@ void WriteParameterFile::a1_WriteReconParameters(CalibrationParam params, Detect
 	this->m_write_calparam(params);
 	this->m_write_det(det);
 	this->m_write_vox(vox);
+	this->m_write_objparam(objparam);
 	this->m_write_scanparam(scanparam);
 	this->m_write_filepath(filepath);
 	this->m_file.close();
@@ -465,7 +475,7 @@ void WriteParameterFile::a1_WriteReconParameters(CalibrationParam params, Detect
 }
 
 void WriteParameterFile::a1_WriteReconParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
-											VoxVolParam vox, ScanParameters scanparam, 
+											VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, 
 											FilePaths filepath)
 {
 	this->m_file.precision(4);
@@ -474,6 +484,7 @@ void WriteParameterFile::a1_WriteReconParameters(std::string parameterfilename, 
 	this->m_write_calparam(params);
 	this->m_write_det(det);
 	this->m_write_vox(vox);
+	this->m_write_objparam(objparam);
 	this->m_write_scanparam(scanparam);
 	this->m_write_filepath(filepath);
 	this->m_file.close();
@@ -481,7 +492,7 @@ void WriteParameterFile::a1_WriteReconParameters(std::string parameterfilename, 
 }
 
 void WriteParameterFile::a1_WriteForwardParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
-											VoxVolParam vox, ScanParameters scanparam, 
+											VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, 
 											FilePaths filepath)
 {
 	this->m_file.precision(4);
@@ -490,13 +501,14 @@ void WriteParameterFile::a1_WriteForwardParameters(std::string parameterfilename
 	this->m_write_calparam(params);
 	this->m_write_det(det);
 	this->m_write_vox(vox);
+	this->m_write_objparam(objparam);
 	this->m_write_scanparam(scanparam);
 	this->m_write_filepath(filepath);
 	this->m_file.close();
 	std::cout << "Parameter file written to: " << parameterfilename << std::endl;
 }
 
-void WriteParameterFile::a1_WriteForwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
+void WriteParameterFile::a1_WriteForwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, FilePaths filepath)
 {
 	std::string parameterfilename = filepath.ProjFileNameRoot+".info";
 
@@ -506,6 +518,7 @@ void WriteParameterFile::a1_WriteForwardParameters(CalibrationParam params, Dete
 	this->m_write_calparam(params);
 	this->m_write_det(det);
 	this->m_write_vox(vox);
+	this->m_write_objparam(objparam);
 	this->m_write_scanparam(scanparam);
 	this->m_write_filepath(filepath);
 	this->m_file.close();
@@ -513,7 +526,7 @@ void WriteParameterFile::a1_WriteForwardParameters(CalibrationParam params, Dete
 }
 
 void WriteParameterFile::a1_WriteBackwardParameters(std::string parameterfilename, CalibrationParam params, Detector det, 
-											VoxVolParam vox, ScanParameters scanparam, 
+											VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, 
 											FilePaths filepath)
 {
 	this->m_file.precision(4);
@@ -522,13 +535,14 @@ void WriteParameterFile::a1_WriteBackwardParameters(std::string parameterfilenam
 	this->m_write_calparam(params);
 	this->m_write_det(det);
 	this->m_write_vox(vox);
+	this->m_write_objparam(objparam);
 	this->m_write_scanparam(scanparam);
 	this->m_write_filepath(filepath);
 	this->m_file.close();
 	std::cout << "Parameter file written to: " << parameterfilename << std::endl;
 }
 
-void WriteParameterFile::a1_WriteBackwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ScanParameters scanparam, FilePaths filepath)
+void WriteParameterFile::a1_WriteBackwardParameters(CalibrationParam params, Detector det, VoxVolParam vox, ObjectParam objparam, ScanParameters scanparam, FilePaths filepath)
 {
 	std::string parameterfilename = filepath.sim_BpFileNameRoot+".info";
 
@@ -538,6 +552,7 @@ void WriteParameterFile::a1_WriteBackwardParameters(CalibrationParam params, Det
 	this->m_write_calparam(params);
 	this->m_write_det(det);
 	this->m_write_vox(vox);
+	this->m_write_objparam(objparam);
 	this->m_write_scanparam(scanparam);
 	this->m_write_filepath(filepath);
 	this->m_file.close();
@@ -571,8 +586,8 @@ void WriteParameterFile::m_write_det(Detector det)
 	this->m_file << "AxPixels \t\t = " << det.NumAxPixels << "\t\t\t# 2560 Number of Axial pixels (unsigned int)\n";
 	this->m_file << "TAxPixDim \t\t = " << det.TAxPixDimMm << "\t\t# millimeters, Dimension of pixel in Transaxial direction (float)\n";
 	this->m_file << "AxPixDim \t\t = " << det.AxPixDimMm << "\t\t# millimeters, Dimension of pixel in Axial direction (float)\n";
-	this->m_file << "TAxShift \t\t = " << det.TAxShift << "\t\t# pixels (float), no magnification";
-	this->m_file << "AxShift \t\t = " << det.AxShift << "\t\t# pixels (float), no magnification";
+	this->m_file << "TAxShift \t\t = " << det.TAxShift << "\t\t# pixels, no magnification (float)\n";
+	this->m_file << "AxShift \t\t = " << det.AxShift << "\t\t# pixels, no magnification (float)\n";
 	this->m_file << "\n\n";
 }
 
@@ -590,6 +605,20 @@ void WriteParameterFile::m_write_vox(VoxVolParam vox)
 	this->m_file << "\n\n";
 }
 
+void WriteParameterFile::m_write_objparam(ObjectParam objparam)
+{
+	this->m_file << "############################### \n";
+	this->m_file << "###### Object Parameters ###### \n";
+	this->m_file << "############################### \n\n";
+	this->m_file << "ObjX \t\t = " << objparam.ObjX << "\t\t\t# millimeters, x shift of object from origin (float)\n";
+	this->m_file << "ObjY \t\t = " << objparam.ObjY << "\t\t\t# millimeters, y shift of object from origin (float)\n";
+	this->m_file << "ObjZ \t\t = " << objparam.ObjZ << "\t\t\t# millimeters, z shift of object from origin (float)\n";
+	this->m_file << "ObjXangle \t = " << objparam.ObjXangle << "\t\t# degrees, angular orientation of object about x-axis (float), not used \n";
+	this->m_file << "ObjYangle \t = " << objparam.ObjYangle << "\t\t# degrees, angular orientation of object about y-axis (float), not used \n";
+	this->m_file << "ObjZangle \t = " << objparam.ObjZangle << "\t\t# degrees, angular orientation of object about z-axis (float), not used \n";
+	this->m_file << "\n\n";
+}
+
 void WriteParameterFile::m_write_scanparam(ScanParameters scanparam)
 {
 	this->m_file << "############################### \n";
@@ -600,6 +629,8 @@ void WriteParameterFile::m_write_scanparam(ScanParameters scanparam)
 	this->m_file << "DeltaAng \t\t = " << scanparam.DeltaAng << "\t\t# degrees, Angular spacing between projections (float)\n";
 	this->m_file << "\n\n";
 }
+
+
 
 void WriteParameterFile::m_write_filepath(FilePaths filepath)
 {
