@@ -45,6 +45,8 @@ struct Detector
 	unsigned int NumAxPixels;
 	float TAxPixDimMm;
 	float AxPixDimMm;
+	float TAxShift;
+	float AxShift;
 
 	int LoadFromConfigFile(std::string FileName)
 	{
@@ -53,6 +55,8 @@ struct Detector
 		this->NumAxPixels	= configfile.read<unsigned int>("AxPixels");
 		this->TAxPixDimMm	= configfile.read<float>("TAxPixDim");
 		this->AxPixDimMm	= configfile.read<float>("AxPixDim");
+		this->TAxShift		= configfile.read<float>("TAxShift");
+		this->AxShift		= configfile.read<float>("AxShift");
 		return 0;
 	}
 };

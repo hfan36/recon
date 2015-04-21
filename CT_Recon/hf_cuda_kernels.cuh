@@ -89,9 +89,9 @@ __device__ float pixel_iterate( float NumPixels, float PixelsDimMm, float Mag, i
 
 //more accurate when compared to matlab linspace, error is lowest towards 0, higher later, but around 1e-6 range
 //more centered
-__device__ float pixel_iterate2( float NumPixels, float PixelsDimMm, float Mag, int iterator)
+__device__ float pixel_iterate2( float NumPixels, float PixelsDimMm, float Mag, int iterator, int pixel_shift)
 {
-	float result = __fdividef(-(NumPixels-1.0f),2.0f)*PixelsDimMm*Mag + __fdividef( (float)iterator, NumPixels)*NumPixels*PixelsDimMm*Mag;
+	float result = (__fdividef(-(NumPixels-1.0f),2.0f) + pixel_shift) * PixelsDimMm*Mag + __fdividef( (float)iterator, NumPixels)*NumPixels*PixelsDimMm*Mag;
 	return (  __fdiv_rz( rintf(result * 100000.0f), 100000.0f)  );
 	//return(result);
 }

@@ -26,6 +26,10 @@ int main()
 	sdkResetTimer(&timer);
 	sdkStartTimer(&timer);
 	
+	CTSystem mysystem;
+	mysystem.a_SetCTSystemValue("CTParameters.cfg");
+	std::cout << "DeltaAng = " << mysystem.a_ScanParam.DeltaAng << std::endl;
+
 	//---------------- how to use siddon_recon class --------------------------------
 	siddon_recon recon;
 	//recon.a1_FORWARD_PROJECTION("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "CTParameters.cfg");
@@ -33,6 +37,7 @@ int main()
 	//recon.a1_BACKWARD_PROJECTION("H:\\Visual Studio 2010\\CT_Recon\\CT_Recon", "MasterParameterFile.cfg", true);
 	//-------------------------------------------------------------------
 	
+
 	sdkStopTimer(&timer);
 	totalTime = sdkGetTimerValue(&timer)*1e-3;
 	printf("calculation time = %f seconds \n", totalTime);

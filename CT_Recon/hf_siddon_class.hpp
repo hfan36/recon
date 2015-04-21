@@ -571,6 +571,8 @@ void WriteParameterFile::m_write_det(Detector det)
 	this->m_file << "AxPixels \t\t = " << det.NumAxPixels << "\t\t\t# 2560 Number of Axial pixels (unsigned int)\n";
 	this->m_file << "TAxPixDim \t\t = " << det.TAxPixDimMm << "\t\t# millimeters, Dimension of pixel in Transaxial direction (float)\n";
 	this->m_file << "AxPixDim \t\t = " << det.AxPixDimMm << "\t\t# millimeters, Dimension of pixel in Axial direction (float)\n";
+	this->m_file << "TAxShift \t\t = " << det.TAxShift << "\t\t# pixels (float), no magnification";
+	this->m_file << "AxShift \t\t = " << det.AxShift << "\t\t# pixels (float), no magnification";
 	this->m_file << "\n\n";
 }
 
